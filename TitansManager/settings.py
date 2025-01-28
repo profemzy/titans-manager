@@ -246,3 +246,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+# Get CSRF trusted origins from environment variable, fallback to default if not set
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1').split(',')
+
+# CSRF settings
+CSRF_COOKIE_SECURE = True  # for HTTPS
+CSRF_USE_SESSIONS = True   # Store CSRF token in session instead of cooki
