@@ -248,7 +248,8 @@ REST_FRAMEWORK = {
 }
 
 # CSRF settings
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1').split(',')
+# CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1').split(',')
+CSRF_TRUSTED_ORIGINS = ["https://*.ops.infotitans.ca"]
 CSRF_COOKIE_SECURE = True
 CSRF_USE_SESSIONS = True
 
