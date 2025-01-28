@@ -257,3 +257,8 @@ CSRF_USE_SESSIONS = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = True
+
+# Login redirect settings
+LOGIN_REDIRECT_URL = '/titans-admin/'
+LOGIN_URL = '/titans-admin/login/'
+LOGOUT_REDIRECT_URL = '/'
