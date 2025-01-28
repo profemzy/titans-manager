@@ -14,7 +14,7 @@ services:
 
  web:
    build: .
-   container_name: django-docker
+   container_name: titans-manager
    ports:
      - "8000:8000"
    depends_on:

@@ -34,16 +34,107 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "import_export",
+    "rangefilter",
     "rest_framework",
     "rest_framework_simplejwt",
     'core',
 ]
+
+JAZZMIN_SETTINGS = {
+    "site_title": "TitansManager Admin",
+    "site_header": "TitansManager",
+    "site_brand": "TitansManager",
+    "welcome_sign": "Welcome to the TitansManager Admin Portal",
+    "copyright": "TitansManager Ltd",
+    # Logo to use for your site, must be present in static files, used for brand on top left
+    # "site_logo": "books/img/logo.png",
+    "search_model": ["auth.User", "core.Client", "core.Project"],
+    "user_avatar": None,
+
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Support", "url": "https://github.com/yourusername/TitansManager/issues", "new_window": True},
+        {"model": "auth.User"},
+    ],
+
+    # CSS classes that are applied to the logo above
+    "site_logo_classes": "img-circle",
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+     "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "core.client": "fas fa-building",
+        "core.project": "fas fa-project-diagram",
+        "core.task": "fas fa-tasks",
+        "core.income": "fas fa-money-bill-wave",
+        "core.expense": "fas fa-file-invoice-dollar",
+        "core.invoice": "fas fa-file-invoice",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": False,
+    "custom_css": None,
+    "custom_js": None,
+    "show_ui_builder": True,
+
+    "sidebar_fixed": True,
+
+    # Whether to enable collapsing the sidebar
+    "sidebar_collapse": False,
+
+    # Whether to start the sidebar collapsed
+    "sidebar_collapse_pin": False,
+
+    # Whether to enable collapsing the menu
+    "collapse_navbar": False,
+
+    # Dark mode
+    "dark_mode_theme": None,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-info",
+    "accent": "accent-primary",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": False,
+    "sidebar": "sidebar-dark-info",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -55,6 +146,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
+
+# WhiteNoise configuration
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = "TitansManager.urls"
 
