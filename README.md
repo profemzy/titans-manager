@@ -158,7 +158,7 @@ The TitansManager app is designed to help IT consulting companies manage income,
 ## Azure Services Used
 
 1. **Azure App Service**: Host the Django backend.
-2. **Azure SQL Database**: Store structured data (clients, projects, income, expenses).
+2. **Azure Postgres Database**: Store structured data (clients, projects, income, expenses).
 3. **Azure Cosmos DB**: Store unstructured data (e.g., logs).
 4. **Azure Blob Storage**: Store files (e.g., receipts, invoices).
 5. **Azure Static Web Apps**: Host the React frontend.
