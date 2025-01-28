@@ -8,7 +8,7 @@ The TitansManager app is designed to help IT consulting companies manage income,
 ## Technology Stack
 - **Frontend**: React.js (with Material-UI for styling).
 - **Backend**: Django (Python-based framework).
-- **Database**: Azure SQL Database (structured data) and Azure Cosmos DB (unstructured data).
+- **Database**: Azure Postgres SQL Database (structured data) and Azure Cosmos DB (unstructured data).
 - **Authentication**: Django's built-in authentication with JWT (JSON Web Tokens).
 - **Hosting**: Azure App Service (backend), Azure Static Web Apps (frontend), Azure Blob Storage (file storage).
 - **CI/CD**: Azure DevOps.
