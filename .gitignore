@@ -204,6 +204,7 @@ db.sqlite3
 *.pylint.err
 *.pylint.report
 *.pylint.cache
+kubernetes/secret.yaml
 *.pylint.d
 *.pylint.log
 *.pylint.out

@@ -56,13 +56,13 @@ JAZZMIN_SETTINGS = {
     "copyright": "TitansManager Ltd",
     # Logo to use for your site, must be present in static files, used for brand on top left
     # "site_logo": "books/img/logo.png",
-    "search_model": ["auth.User", "core.Client", "core.Project"],
+    "search_model": ["core.User", "core.Client", "core.Project"],
     "user_avatar": None,
 
     "topmenu_links": [
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
         {"name": "Support", "url": "https://github.com/yourusername/TitansManager/issues", "new_window": True},
-        {"model": "auth.User"},
+        {"model": "core.User"},
     ],
 
     # CSS classes that are applied to the logo above

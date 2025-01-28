@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: titans-manager
+  namespace: wackops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: titans-manager
+  template:
+    metadata:
+      labels:
+        app: titans-manager
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nodepoolos
+                operator: In
+                values:
+                - linux
+      initContainers:
+      - name: migrate
+        image: wackopsprodacr.azurecr.io/titans-manager:0.0.2
+        command: ["python", "manage.py", "migrate"]
+        env:
+        - name: DJANGO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DJANGO_SECRET_KEY
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DEBUG
+        - name: DJANGO_LOGLEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DJANGO_LOGLEVEL
+        - name: DJANGO_ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DJANGO_ALLOWED_HOSTS
+        - name: DATABASE_ENGINE
+          value: postgresql_psycopg2
+        - name: DATABASE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_NAME
+        - name: DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_USERNAME
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_PASSWORD
+        - name: DATABASE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_HOST
+        - name: DATABASE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DATABASE_PORT
+      containers:
+      - name: titans-manager
+        image: wackopsprodacr.azurecr.io/titans-manager:0.0.6
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DJANGO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DJANGO_SECRET_KEY
+        - name: DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DEBUG
+        - name: DJANGO_LOGLEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DJANGO_LOGLEVEL
+        - name: DJANGO_ALLOWED_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DJANGO_ALLOWED_HOSTS
+        - name: DATABASE_ENGINE
+          value: postgresql_psycopg2
+        - name: DATABASE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_NAME
+        - name: DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_USERNAME
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_PASSWORD
+        - name: DATABASE_HOST
+          valueFrom:
+            secretKeyRef:
+              name: django-secret
+              key: DATABASE_HOST
+        - name: DATABASE_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: DATABASE_PORT
+        - name: CSRF_TRUSTED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: django-config
+              key: CSRF_TRUSTED_ORIGINS
+        volumeMounts:
+        - name: static-volume
+          mountPath: /app/staticfiles
+        - name: media-volume
+          mountPath: /app/media
+      volumes:
+      - name: static-volume
+        persistentVolumeClaim:
+          claimName: static-pvc
+      - name: media-volume
+        persistentVolumeClaim:
+          claimName: media-pvc
