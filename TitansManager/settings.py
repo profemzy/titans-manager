@@ -262,3 +262,9 @@ SECURE_SSL_REDIRECT = True
 LOGIN_REDIRECT_URL = '/titans-admin/'
 LOGIN_URL = '/titans-admin/login/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Timezone settings
+TIME_ZONE = 'America/Vancouver'  # Pacific Time
+USE_TZ = True                    # Enable timezone support
+USE_L10N = True                  # Enable localization
+USE_I18N = True                  # Enable internationalization
