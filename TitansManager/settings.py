@@ -247,9 +247,12 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Get CSRF trusted origins from environment variable, fallback to default if not set
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1').split(',')
-
 # CSRF settings
-CSRF_COOKIE_SECURE = True  # for HTTPS
-CSRF_USE_SESSIONS = True   # Store CSRF token in session instead of cooki
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1').split(',')
+CSRF_COOKIE_SECURE = True
+CSRF_USE_SESSIONS = True
+
+# Additional Security Settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
