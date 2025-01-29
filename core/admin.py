@@ -1,10 +1,11 @@
 import datetime
-
+from django.db.models import Sum, Count, Q
 from django.contrib import admin
 from .models import User, Client, Project, Task, Income, Expense, Invoice
-from rangefilter.filters import DateRangeFilter
+from django.contrib import admin
 from django.utils.html import format_html
-from django.db.models import Sum
+from django.db.models import Sum, Count, Q
+from rangefilter.filters import DateRangeFilter
 
 # Customize Admin Header
 admin.site.site_header = "TitansManager Admin"
@@ -17,30 +18,696 @@ class TaskInline(admin.TabularInline):
     extra = 1
 
 # Register Models
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.html import format_html
+from django.db.models import Count, Q
+from rangefilter.filters import DateRangeFilter
+
+
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'role')
-    search_fields = ('username', 'email')
-    list_filter = ('role',)
+class UserAdmin(BaseUserAdmin):
+    list_display = (
+        'username',
+        'full_name',
+        'email',
+        'employee_id',
+        'display_status',
+        'department',
+        'role',
+        'display_workload',
+        'display_reports_to',
+    )
+
+    list_filter = (
+        'status',
+        'role',
+        'department',
+        'is_active',
+        ('hire_date', DateRangeFilter),
+        ('last_login', DateRangeFilter),
+    )
+
+    search_fields = (
+        'username',
+        'first_name',
+        'last_name',
+        'email',
+        'employee_id',
+        'phone',
+    )
+
+    fieldsets = (
+        ('Personal Information', {
+            'fields': (
+                ('username', 'email'),
+                ('first_name', 'last_name'),
+                ('password',),
+            )
+        }),
+        ('Work Information', {
+            'fields': (
+                ('role', 'department', 'status'),
+                'employee_id',
+                'job_title',
+                'reports_to',
+                'hire_date',
+                'hourly_rate',
+            )
+        }),
+        ('Contact Details', {
+            'fields': (
+                'phone',
+                ('emergency_contact', 'emergency_phone'),
+            )
+        }),
+        ('Skills & Expertise', {
+            'fields': (
+                'skills',
+                'certifications',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('Work Schedule', {
+            'fields': (
+                'working_hours',
+                'time_zone',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('Permissions', {
+            'fields': (
+                'is_active',
+                'is_staff',
+                'is_superuser',
+                'groups',
+                'user_permissions',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('Important Dates', {
+            'fields': (
+                'last_login',
+                'date_joined',
+                'last_password_change',
+            ),
+            'classes': ('collapse',)
+        }),
+    )
+
+    readonly_fields = (
+        'last_login',
+        'date_joined',
+        'last_password_change',
+    )
+
+    def display_status(self, obj):
+        colors = {
+            'active': 'green',
+            'on_leave': 'orange',
+            'inactive': 'red'
+        }
+        return format_html(
+            '<span style="color: {};">{}</span>',
+            colors.get(obj.status, 'black'),
+            obj.get_status_display()
+        )
+
+    display_status.short_description = 'Status'
+
+    def display_workload(self, obj):
+        active_tasks = obj.tasks.exclude(status='Completed').count()
+        total_tasks = obj.tasks.count()
+        if total_tasks:
+            return format_html(
+                '{} active / {} total',
+                active_tasks,
+                total_tasks
+            )
+        return '0 tasks'
+
+    display_workload.short_description = 'Workload'
+
+    def display_reports_to(self, obj):
+        if obj.reports_to:
+            return format_html(
+                '<a href="{}/">{}</a>',
+                obj.reports_to.id,
+                obj.reports_to.get_full_name() or obj.reports_to.username
+            )
+        return '-'
+
+    display_reports_to.short_description = 'Reports To'
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('reports_to')
+
+    actions = ['mark_as_active', 'mark_as_inactive', 'mark_as_on_leave']
+
+    def mark_as_active(self, request, queryset):
+        queryset.update(status='active', is_active=True)
+
+    mark_as_active.short_description = "Mark selected users as active"
+
+    def mark_as_inactive(self, request, queryset):
+        queryset.update(status='inactive', is_active=False)
+
+    mark_as_inactive.short_description = "Mark selected users as inactive"
+
+    def mark_as_on_leave(self, request, queryset):
+        queryset.update(status='on_leave')
+
+    mark_as_on_leave.short_description = "Mark selected users as on leave"
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(request, extra_context)
+
+        try:
+            queryset = response.context_data['cl'].queryset
+        except (AttributeError, KeyError):
+            return response
+
+        metrics = {
+            'total_users': queryset.count(),
+            'active_users': queryset.filter(status='active').count(),
+            'department_counts': dict(
+                queryset.values('department')
+                .annotate(count=Count('id'))
+                .values_list('department', 'count')
+            ),
+            'role_counts': dict(
+                queryset.values('role')
+                .annotate(count=Count('id'))
+                .values_list('role', 'count')
+            )
+        }
+
+        response.context_data['summary_metrics'] = metrics
+        return response
+
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'company')
-    search_fields = ('name', 'email', 'company')
-    list_filter = ('company',)
+    list_display = (
+        'name',
+        'company',
+        'email',
+        'display_status',
+        'display_projects',
+        'display_revenue',
+        'display_outstanding',
+        'created_at'
+    )
+
+    list_filter = (
+        'status',
+        'industry',
+        'country',
+        ('created_at', DateRangeFilter),
+    )
+
+    search_fields = (
+        'name',
+        'email',
+        'company',
+        'phone',
+        'address',
+        'city',
+        'tax_number'
+    )
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': (
+                'name',
+                'company',
+                'status',
+                'industry',
+            )
+        }),
+        ('Contact Information', {
+            'fields': (
+                'email',
+                'alternate_email',
+                'phone',
+                'mobile_phone',
+                'website',
+            )
+        }),
+        ('Address Information', {
+            'fields': (
+                'address',
+                'city',
+                'state',
+                'postal_code',
+                'country',
+            )
+        }),
+        ('Billing Information', {
+            'fields': (
+                'billing_address',
+                'billing_email',
+                'payment_terms',
+                'tax_number',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('Additional Information', {
+            'fields': (
+                'notes',
+                'created_at',
+                'updated_at',
+            ),
+            'classes': ('collapse',)
+        }),
+    )
+
+    readonly_fields = ('created_at', 'updated_at')
+
+    def display_status(self, obj):
+        colors = {
+            'active': 'green',
+            'inactive': 'red',
+            'prospect': 'blue',
+            'former': 'grey'
+        }
+        return format_html(
+            '<span style="color: {};">{}</span>',
+            colors.get(obj.status, 'black'),
+            obj.get_status_display()
+        )
+
+    display_status.short_description = 'Status'
+
+    def display_projects(self, obj):
+        return format_html(
+            '<a href="?client__id__exact={}">{} projects</a>',
+            obj.id,
+            obj.total_projects
+        )
+
+    display_projects.short_description = 'Projects'
+
+    def display_revenue(self, obj):
+        return f"${obj.total_revenue:,.2f}"
+
+    display_revenue.short_description = 'Total Revenue'
+
+    def display_outstanding(self, obj):
+        if obj.total_outstanding > 0:
+            return format_html(
+                '<span style="color: red;">${:,.2f}</span>',
+                obj.total_outstanding
+            )
+        return "$0.00"
+
+    display_outstanding.short_description = 'Outstanding'
+
+    actions = ['mark_as_active', 'mark_as_inactive']
+
+    def mark_as_active(self, request, queryset):
+        queryset.update(status='active')
+
+    mark_as_active.short_description = "Mark selected clients as active"
+
+    def mark_as_inactive(self, request, queryset):
+        queryset.update(status='inactive')
+
+    mark_as_inactive.short_description = "Mark selected clients as inactive"
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(request, extra_context)
+
+        try:
+            queryset = response.context_data['cl'].queryset
+        except (AttributeError, KeyError):
+            return response
+
+        # Add summary metrics
+        metrics = {
+            'total_clients': queryset.count(),
+            'active_clients': queryset.filter(status='active').count(),
+            'total_revenue': queryset.aggregate(
+                total=Sum('incomes__amount'))['total'] or 0,
+            'total_outstanding': queryset.aggregate(
+                total=Sum('invoices__amount',
+                          filter=Q(invoices__status='Unpaid')))['total'] or 0
+        }
+
+        response.context_data['summary_metrics'] = metrics
+        return response
+
+
+from django.contrib import admin
+from django.utils.html import format_html
+from django.db.models import Sum, Count, Q
+from rangefilter.filters import DateRangeFilter
+
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'client', 'start_date', 'end_date', 'budget')
-    search_fields = ('name', 'client__name')
-    list_filter = ('client', 'start_date', 'end_date')
+    list_display = (
+        'code',
+        'name',
+        'client',
+        'display_status',
+        'manager',
+        'display_dates',
+        'display_budget',
+        'display_completion',
+        'display_profit',
+    )
+
+    list_filter = (
+        'status',
+        'priority',
+        'client',
+        ('start_date', DateRangeFilter),
+        ('end_date', DateRangeFilter),
+    )
+
+    search_fields = (
+        'code',
+        'name',
+        'client__name',
+        'description',
+        'manager__username',
+    )
+
     inlines = [TaskInline]
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': (
+                ('code', 'name'),
+                'description',
+                ('status', 'priority'),
+                'client',
+                'manager',
+            )
+        }),
+        ('Dates', {
+            'fields': (
+                ('start_date', 'end_date'),
+                ('actual_start_date', 'actual_end_date'),
+            )
+        }),
+        ('Financial Information', {
+            'fields': (
+                'budget',
+                'actual_cost',
+                ('hourly_rate', 'estimated_hours'),
+            )
+        }),
+        ('Team', {
+            'fields': ('team_members',),
+        }),
+        ('Additional Information', {
+            'fields': (
+                'github_repo',
+                'documentation_url',
+                'notes',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('System Information', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
+
+    readonly_fields = ('code', 'created_at', 'updated_at')
+    filter_horizontal = ('team_members',)
+
+    def display_status(self, obj):
+        colors = {
+            'planning': 'blue',
+            'in_progress': 'orange',
+            'on_hold': 'red',
+            'completed': 'green',
+            'cancelled': 'grey'
+        }
+        if obj.is_overdue:
+            return format_html(
+                '<span style="color: red;">⚠️ {}</span>',
+                obj.get_status_display()
+            )
+        return format_html(
+            '<span style="color: {};">{}</span>',
+            colors.get(obj.status, 'black'),
+            obj.get_status_display()
+        )
+
+    display_status.short_description = 'Status'
+
+    def display_dates(self, obj):
+        if obj.is_overdue:
+            return format_html(
+                '<span style="color: red;">{} to {}</span>',
+                obj.start_date.strftime('%Y-%m-%d'),
+                obj.end_date.strftime('%Y-%m-%d')
+            )
+        return f"{obj.start_date.strftime('%Y-%m-%d')} to {obj.end_date.strftime('%Y-%m-%d')}"
+
+    display_dates.short_description = 'Timeline'
+
+    def display_budget(self, obj):
+        percentage = obj.budget_utilized
+        color = 'green' if percentage <= 100 else 'red'
+        return format_html(
+            '${:,.2f} <span style="color: {};">({:.1f}%)</span>',
+            obj.budget,
+            color,
+            percentage
+        )
+
+    display_budget.short_description = 'Budget'
+
+    def display_completion(self, obj):
+        percentage = obj.completion_percentage
+        return format_html(
+            '<div style="width: 100px; background-color: #f1f1f1;">'
+            '<div style="width: {}px; background-color: #4CAF50; height: 20px;">'
+            '</div></div> {:.1f}%',
+            percentage,
+            percentage
+        )
+
+    display_completion.short_description = 'Completion'
+
+    def display_profit(self, obj):
+        profit = obj.total_income - obj.total_expenses
+        color = 'green' if profit >= 0 else 'red'
+        return format_html(
+            '<span style="color: {};">${:,.2f}</span>',
+            color,
+            profit
+        )
+
+    display_profit.short_description = 'Profit/Loss'
+
+    actions = ['mark_as_completed', 'mark_as_on_hold']
+
+    def mark_as_completed(self, request, queryset):
+        queryset.update(status='completed', actual_end_date=timezone.now().date())
+
+    mark_as_completed.short_description = "Mark selected projects as completed"
+
+    def mark_as_on_hold(self, request, queryset):
+        queryset.update(status='on_hold')
+
+    mark_as_on_hold.short_description = "Mark selected projects as on hold"
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(request, extra_context)
+
+        try:
+            queryset = response.context_data['cl'].queryset
+        except (AttributeError, KeyError):
+            return response
+
+        metrics = {
+            'total_projects': queryset.count(),
+            'active_projects': queryset.filter(status='in_progress').count(),
+            'total_budget': queryset.aggregate(total=Sum('budget'))['total'] or 0,
+            'total_profit': queryset.aggregate(
+                profit=Sum('incomes__amount') - Sum('expenses__amount')
+            )['profit'] or 0
+        }
+
+        response.context_data['summary_metrics'] = metrics
+        return response
+
+
+from django.contrib import admin
+from django.utils.html import format_html
+from django.db.models import Q
+from rangefilter.filters import DateRangeFilter
+from django.utils import timezone
+
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('name', 'project', 'assigned_to', 'status', 'due_date')
-    search_fields = ('name', 'project__name', 'assigned_to__username')
-    list_filter = ('status', 'project', 'assigned_to')
+    list_display = (
+        'name',
+        'display_status',
+        'project',
+        'assigned_to',
+        'priority',
+        'display_due_date',
+        'display_time_tracking',
+        'display_completion',
+    )
+
+    list_filter = (
+        'status',
+        'priority',
+        'task_type',
+        'project',
+        'assigned_to',
+        ('due_date', DateRangeFilter),
+        ('created_at', DateRangeFilter),
+    )
+
+    search_fields = (
+        'name',
+        'description',
+        'project__name',
+        'assigned_to__username',
+        'tags',
+    )
+
+    raw_id_fields = ('project', 'assigned_to', 'reviewer')
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': (
+                'name',
+                'description',
+                'project',
+                ('status', 'priority', 'task_type'),
+            )
+        }),
+        ('Assignment', {
+            'fields': (
+                'assigned_to',
+                'reviewer',
+                'dependencies',
+            )
+        }),
+        ('Timing', {
+            'fields': (
+                'due_date',
+                ('estimated_hours', 'actual_hours'),
+                ('started_at', 'completed_at'),
+            )
+        }),
+        ('Additional Information', {
+            'fields': (
+                'github_issue',
+                'tags',
+                'notes',
+            ),
+            'classes': ('collapse',)
+        }),
+        ('System Information', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    readonly_fields = ('created_at', 'updated_at', 'started_at', 'completed_at')
+    filter_horizontal = ('dependencies',)
+
+    def display_status(self, obj):
+        colors = {
+            'pending': '#FFA500',  # Orange
+            'in_progress': '#1E90FF',  # Blue
+            'review': '#9370DB',  # Purple
+            'completed': '#32CD32',  # Green
+            'blocked': '#DC143C',  # Red
+            'cancelled': '#808080'  # Grey
+        }
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            colors.get(obj.status, 'black'),
+            obj.get_status_display()
+        )
+
+    display_status.short_description = 'Status'
+
+    def display_due_date(self, obj):
+        if obj.is_overdue:
+            days_overdue = (timezone.now().date() - obj.due_date).days
+            return format_html(
+                '<span style="color: red;">⚠️ {} ({} days overdue)</span>',
+                obj.due_date.strftime('%Y-%m-%d'),
+                days_overdue
+            )
+        return obj.due_date.strftime('%Y-%m-%d')
+
+    display_due_date.short_description = 'Due Date'
+
+    def display_time_tracking(self, obj):
+        if obj.estimated_hours > 0:
+            percentage = (obj.actual_hours / obj.estimated_hours) * 100
+            color = 'green' if percentage <= 100 else 'red'
+            return format_html(
+                '{:.1f}h / {:.1f}h <span style="color: {};">({:.0f}%)</span>',
+                obj.actual_hours,
+                obj.estimated_hours,
+                color,
+                percentage
+            )
+        return f"{obj.actual_hours}h"
+
+    display_time_tracking.short_description = 'Time Spent'
+
+    def display_completion(self, obj):
+        percentage = obj.completion_percentage
+        return format_html(
+            '<div style="width: 100px; background-color: #f1f1f1;">'
+            '<div style="width: {}px; background-color: #4CAF50; height: 20px;">'
+            '</div></div> {:.1f}%',
+            percentage,
+            percentage
+        )
+
+    display_completion.short_description = 'Completion'
+
+    actions = ['mark_as_in_progress', 'mark_as_completed', 'mark_as_blocked']
+
+    def mark_as_in_progress(self, request, queryset):
+        queryset.filter(status='pending').update(
+            status='in_progress',
+            started_at=timezone.now()
+        )
+
+    mark_as_in_progress.short_description = "Mark selected tasks as in progress"
+
+    def mark_as_completed(self, request, queryset):
+        queryset.update(
+            status='completed',
+            completed_at=timezone.now()
+        )
+
+    mark_as_completed.short_description = "Mark selected tasks as completed"
+
+    def mark_as_blocked(self, request, queryset):
+        queryset.update(status='blocked')
+
+    mark_as_blocked.short_description = "Mark selected tasks as blocked"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'project', 'assigned_to', 'reviewer'
+        )
+
+    def save_model(self, request, obj, form, change):
+        if not change:  # If creating new task
+            if not obj.assigned_to:
+                obj.assigned_to = request.user
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Income)
