@@ -42,11 +42,113 @@ class TaskAdmin(admin.ModelAdmin):
     search_fields = ('name', 'project__name', 'assigned_to__username')
     list_filter = ('status', 'project', 'assigned_to')
 
+
 @admin.register(Income)
 class IncomeAdmin(admin.ModelAdmin):
-    list_display = ('amount', 'date', 'client', 'project', 'invoice')
-    search_fields = ('client__name', 'project__name')
-    list_filter = ('date', 'client', 'project')
+    list_display = ('display_amount', 'client', 'project', 'income_type',
+                    'date', 'status', 'payment_method', 'display_overdue')
+
+    list_filter = (
+        'status',
+        'income_type',
+        'payment_method',
+        ('date', DateRangeFilter),
+        'client',
+        'project'
+    )
+
+    search_fields = (
+        'client__name',
+        'project__name',
+        'payment_reference',
+        'description'
+    )
+
+    readonly_fields = ('created_at', 'updated_at', 'tax_amount', 'total_amount')
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': (
+                'client', 'project', 'income_type', 'amount', 'description'
+            )
+        }),
+        ('Dates', {
+            'fields': (
+                'date', 'expected_date', 'received_date'
+            )
+        }),
+        ('Payment Details', {
+            'fields': (
+                'payment_method', 'payment_reference', 'status', 'invoice'
+            )
+        }),
+        ('Tax Information', {
+            'fields': (
+                'tax_rate', 'tax_amount'
+            )
+        }),
+        ('Additional Information', {
+            'fields': ('notes',),
+            'classes': ('collapse',)
+        }),
+        ('System Information', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        })
+    )
+
+    def display_amount(self, obj):
+        return f"${obj.amount:,.2f}"
+
+    display_amount.short_description = 'Amount'
+    display_amount.admin_order_field = 'amount'
+
+    def display_overdue(self, obj):
+        if obj.is_overdue:
+            return f"⚠️ {obj.days_overdue} days"
+        return "✓"
+
+    display_overdue.short_description = 'Overdue'
+
+    actions = ['mark_as_received', 'mark_as_pending']
+
+    def mark_as_received(self, request, queryset):
+        queryset.update(
+            status='received',
+            received_date=datetime.date.today()
+        )
+
+    mark_as_received.short_description = "Mark selected incomes as received"
+
+    def mark_as_pending(self, request, queryset):
+        queryset.update(
+            status='pending',
+            received_date=None
+        )
+
+    mark_as_pending.short_description = "Mark selected incomes as pending"
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(request, extra_context)
+
+        try:
+            queryset = response.context_data['cl'].queryset
+        except (AttributeError, KeyError):
+            return response
+
+        metrics = {
+            'total_income': queryset.aggregate(
+                total=Sum('amount'))['total'] or 0,
+            'pending_income': queryset.filter(
+                status='pending').aggregate(
+                total=Sum('amount'))['total'] or 0,
+            'received_income': queryset.filter(
+                status='received').aggregate(
+                total=Sum('amount'))['total'] or 0
+        }
+
+        response.context_data['summary_metrics'] = metrics
+        return response
 
 
 @admin.register(Expense)
