@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: titans-manager
+  name: tms-app
   namespace: wackops
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: titans-manager
+      app: tms-app
   template:
     metadata:
       labels:
-        app: titans-manager
+        app: tms-app
     spec:
       affinity:
         nodeAffinity:
@@ -30,107 +30,107 @@ spec:
         - name: DJANGO_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: tms-secret
               key: DJANGO_SECRET_KEY
         - name: DEBUG
           valueFrom:
             configMapKeyRef:
-              name: django-config
+              name: tms-config
               key: DEBUG
         - name: DJANGO_LOGLEVEL
           valueFrom:
             configMapKeyRef:
-              name: django-config
+              name: tms-config
               key: DJANGO_LOGLEVEL
         - name: DJANGO_ALLOWED_HOSTS
           valueFrom:
             configMapKeyRef:
-              name: django-config
+              name: tms-config
               key: DJANGO_ALLOWED_HOSTS
         - name: DATABASE_ENGINE
           value: postgresql_psycopg2
         - name: DATABASE_NAME
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: tms-secret
               key: DATABASE_NAME
         - name: DATABASE_USERNAME
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: tms-secret
               key: DATABASE_USERNAME
         - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: tms-secret
               key: DATABASE_PASSWORD
         - name: DATABASE_HOST
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: tms-secret
               key: DATABASE_HOST
         - name: DATABASE_PORT
           valueFrom:
             configMapKeyRef:
-              name: django-config
+              name: tms-config
               key: DATABASE_PORT
       containers:
       - name: titans-manager
-        image: wackopsprodacr.azurecr.io/titans-manager:0.1.2
+        image: wackopsprodacr.azurecr.io/titans-manager:0.1.3
         ports:
         - containerPort: 8000
         env:
         - name: DJANGO_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: tms-secret
               key: DJANGO_SECRET_KEY
         - name: DEBUG
           valueFrom:
             configMapKeyRef:
-              name: django-config
+              name: tms-config
               key: DEBUG
         - name: DJANGO_LOGLEVEL
           valueFrom:
             configMapKeyRef:
-              name: django-config
+              name: tms-config
               key: DJANGO_LOGLEVEL
         - name: DJANGO_ALLOWED_HOSTS
           valueFrom:
             configMapKeyRef:
-              name: django-config
+              name: tms-config
               key: DJANGO_ALLOWED_HOSTS
         - name: DATABASE_ENGINE
           value: postgresql_psycopg2
         - name: DATABASE_NAME
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: tms-secret
               key: DATABASE_NAME
         - name: DATABASE_USERNAME
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: tms-secret
               key: DATABASE_USERNAME
         - name: DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: tms-secret
               key: DATABASE_PASSWORD
         - name: DATABASE_HOST
           valueFrom:
             secretKeyRef:
-              name: django-secret
+              name: tms-secret
               key: DATABASE_HOST
         - name: DATABASE_PORT
           valueFrom:
             configMapKeyRef:
-              name: django-config
+              name: tms-config
               key: DATABASE_PORT
         - name: CSRF_TRUSTED_ORIGINS
           valueFrom:
             configMapKeyRef:
-              name: django-config
+              name: tms-config
               key: CSRF_TRUSTED_ORIGINS
         volumeMounts:
         - name: static-volume
@@ -140,7 +140,7 @@ spec:
       volumes:
       - name: static-volume
         persistentVolumeClaim:
-          claimName: static-pvc
+          claimName: static
       - name: media-volume
         persistentVolumeClaim:
-          claimName: media-pvc
+          claimName: media

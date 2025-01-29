@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: titans-manager
+  name: tms-app
   namespace: wackops
 spec:
   selector:
-    app: titans-manager
+    app: tms-app
   ports:
     - protocol: TCP
       port: 8000

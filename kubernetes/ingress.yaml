@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
-  name: titans-manager-ingress
+  name: tms-ingress
   namespace: wackops
 spec:
   ingressClassName: nginx
@@ -13,7 +13,7 @@ spec:
       paths:
       - backend:
           service:
-            name: titans-manager
+            name: tms-app
             port:
               number: 8000
         path: /

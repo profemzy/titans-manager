@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: static-pvc
+  name: static
   namespace: wackops
 spec:
   storageClassName: azurefile-csi
@@ -14,7 +14,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: media-pvc
+  name: media
   namespace: wackops
 spec:
   storageClassName: azurefile-csi
