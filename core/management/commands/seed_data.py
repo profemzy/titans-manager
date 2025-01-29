@@ -68,11 +68,17 @@ class Command(BaseCommand):
 
         # Create Expenses
         Expense.objects.create(
+            title='Software Licenses',
             amount=1000.00,
+            tax_amount=50.00,  # Assuming some tax
             date='2023-10-05',
-            category='Software',
+            category='software',  # Match the choices in model
+            tax_status='taxable',
+            payment_method='credit_card',
             description='Purchased software licenses',
-            project=project_x
+            status='paid',
+            submitted_by=admin,  # Required field
+            vendor='Software Vendor Inc.'
         )
 
         self.stdout.write(self.style.SUCCESS('Database seeded successfully!'))
