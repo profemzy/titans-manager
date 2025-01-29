@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = "django-insecure-1ffaq*8vo0!kjzo*u$u7p7(8i(h#5qo!2lyh9e=ohpx2nz4ro_"
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-1ffaq*8vo0!kjzo*u$u7p7(8i(h#5qo!2lyh9e=ohpx2nz4ro_")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
@@ -179,8 +179,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv('DATABASE_NAME', 'tmsdb'),
-        "USER": os.getenv('DATABASE_USERNAME', 'myprojectuser'),
-        "PASSWORD": os.getenv('DATABASE_PASSWORD', 'password'),
+        "USER": os.getenv('DATABASE_USERNAME', 'dbuser'),
+        "PASSWORD": os.getenv('DATABASE_PASSWORD', 'dbpassword'),
         "HOST": os.getenv('DATABASE_HOST', '127.0.0.1'),
         "PORT": os.getenv('DATABASE_PORT', 5432),
     }

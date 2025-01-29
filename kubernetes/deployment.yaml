@@ -24,7 +24,7 @@ spec:
                 - linux
       initContainers:
       - name: migrate
-        image: wackopsprodacr.azurecr.io/titans-manager:0.0.8
+        image: wackopsprodacr.azurecr.io/titans-manager:0.0.9
         command: ["python", "manage.py", "migrate"]
         env:
         - name: DJANGO_SECRET_KEY
