@@ -1,5 +1,10 @@
+import datetime
+
 from django.contrib import admin
 from .models import User, Client, Project, Task, Income, Expense, Invoice
+from rangefilter.filters import DateRangeFilter
+from django.utils.html import format_html
+from django.db.models import Sum
 
 # Customize Admin Header
 admin.site.site_header = "TitansManager Admin"
@@ -43,11 +48,98 @@ class IncomeAdmin(admin.ModelAdmin):
     search_fields = ('client__name', 'project__name')
     list_filter = ('date', 'client', 'project')
 
+
 @admin.register(Expense)
 class ExpenseAdmin(admin.ModelAdmin):
-    list_display = ('amount', 'date', 'category', 'project')
-    search_fields = ('category', 'project__name')
-    list_filter = ('category', 'date', 'project')
+    list_display = ('title', 'category', 'amount', 'display_total', 'date',
+                    'status', 'is_recurring', 'receipt_link')
+    list_filter = (
+        'status',
+        'category',
+        'payment_method',
+        'is_recurring',
+        ('date', DateRangeFilter),
+        'tax_status',
+    )
+    search_fields = ('title', 'description', 'vendor', 'invoice_number')
+    readonly_fields = ('created_at', 'updated_at', 'total_amount')
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('title', 'description', 'amount', 'tax_amount', 'category')
+        }),
+        ('Payment Details', {
+            'fields': ('payment_method', 'payment_reference', 'tax_status',
+                       'date', 'due_date', 'paid_date')
+        }),
+        ('Recurring Settings', {
+            'fields': ('is_recurring', 'recurring_frequency', 'recurring_end_date'),
+            'classes': ('collapse',)
+        }),
+        ('Documentation', {
+            'fields': ('receipt', 'invoice_number', 'vendor', 'vendor_tax_number')
+        }),
+        ('Approval Information', {
+            'fields': ('status', 'submitted_by', 'approved_by', 'notes')
+        }),
+        ('System Information', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def display_total(self, obj):
+        return f"${obj.total_amount:.2f}"
+
+    display_total.short_description = 'Total Amount'
+
+    def receipt_link(self, obj):
+        if obj.receipt:
+            return format_html('<a href="{}" target="_blank">View Receipt</a>',
+                               obj.receipt.url)
+        return "No receipt"
+
+    receipt_link.short_description = 'Receipt'
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('submitted_by', 'approved_by')
+
+    def save_model(self, request, obj, form, change):
+        if not change:  # If creating new expense
+            obj.submitted_by = request.user
+        super().save_model(request, obj, form, change)
+
+    actions = ['mark_as_approved', 'mark_as_paid']
+
+    def mark_as_approved(self, request, queryset):
+        queryset.update(status='approved', approved_by=request.user)
+
+    mark_as_approved.short_description = "Mark selected expenses as approved"
+
+    def mark_as_paid(self, request, queryset):
+        queryset.update(status='paid', paid_date=datetime.date.today())
+
+    mark_as_paid.short_description = "Mark selected expenses as paid"
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(request, extra_context)
+
+        try:
+            queryset = response.context_data['cl'].queryset
+        except (AttributeError, KeyError):
+            return response
+
+        metrics = {
+            'total_amount': queryset.aggregate(
+                total=Sum('amount') + Sum('tax_amount'))['total'] or 0,
+            'pending_amount': queryset.filter(
+                status='pending').aggregate(
+                total=Sum('amount') + Sum('tax_amount'))['total'] or 0,
+        }
+
+        response.context_data['summary_metrics'] = metrics
+        return response
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
