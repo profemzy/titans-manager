@@ -5,8 +5,10 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Q
 from django.db.models import Sum, Count
+from django.db.models import Sum, DecimalField
 from django.utils import timezone
 from django.utils.html import format_html
+from decimal import Decimal
 from rangefilter.filters import DateRangeFilter
 
 from .models import User, Client, Project, Task, Income, Expense, Invoice
@@ -355,7 +357,6 @@ class ClientAdmin(admin.ModelAdmin):
         return response
 
 
-
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     list_display = (
@@ -459,44 +460,47 @@ class ProjectAdmin(admin.ModelAdmin):
                 obj.start_date.strftime('%Y-%m-%d'),
                 obj.end_date.strftime('%Y-%m-%d')
             )
-        return f"{obj.start_date.strftime('%Y-%m-%d')} to {obj.end_date.strftime('%Y-%m-%d')}"
+        return format_html(
+            '<span>{} to {}</span>',
+            obj.start_date.strftime('%Y-%m-%d'),
+            obj.end_date.strftime('%Y-%m-%d')
+        )
 
     display_dates.short_description = 'Timeline'
 
     def display_budget(self, obj):
-        percentage = obj.budget_utilized
-        color = 'green' if percentage <= 100 else 'red'
+        formatted_budget = f"${float(obj.budget):,.2f}"
         return format_html(
-            '${:,.2f} <span style="color: {};">({:.1f}%)</span>',
-            obj.budget,
-            color,
-            percentage
+            '<span>{}</span>',
+            formatted_budget
         )
 
     display_budget.short_description = 'Budget'
 
     def display_completion(self, obj):
-        percentage = obj.completion_percentage
+        percentage = getattr(obj, 'completion_percentage', 0)
+        formatted_percentage = f"{float(percentage):.1f}%"
         return format_html(
             '<div style="width: 100px; background-color: #f1f1f1;">'
-            '<div style="width: {}px; background-color: #4CAF50; height: 20px;">'
-            '</div></div> {:.1f}%',
-            percentage,
-            percentage
+            '<div style="width: {}px; background-color: #4CAF50; height: 20px;"></div>'
+            '</div> {}',
+            min(percentage, 100),
+            formatted_percentage
         )
 
     display_completion.short_description = 'Completion'
 
     def display_profit(self, obj):
-        profit = obj.total_income - obj.total_expenses
-        color = 'green' if profit >= 0 else 'red'
+        total_income = getattr(obj, 'total_income', 0) or 0
+        color = 'green' if total_income >= 0 else 'red'
+        formatted_income = f"${abs(float(total_income)):,.2f}"
         return format_html(
-            '<span style="color: {};">${:,.2f}</span>',
+            '<span style="color: {}">{}</span>',
             color,
-            profit
+            formatted_income
         )
 
-    display_profit.short_description = 'Profit/Loss'
+    display_profit.short_description = 'Income'
 
     actions = ['mark_as_completed', 'mark_as_on_hold']
 
@@ -520,11 +524,14 @@ class ProjectAdmin(admin.ModelAdmin):
 
         metrics = {
             'total_projects': queryset.count(),
-            'active_projects': queryset.filter(status='in_progress').count(),
-            'total_budget': queryset.aggregate(total=Sum('budget'))['total'] or 0,
-            'total_profit': queryset.aggregate(
-                profit=Sum('incomes__amount') - Sum('expenses__amount')
-            )['profit'] or 0
+            'total_budget': queryset.aggregate(
+                total=Sum('budget', output_field=DecimalField(max_digits=18, decimal_places=2))
+            )['total'] or Decimal('0.00'),
+            'total_income': queryset.annotate(
+                income=Sum('incomes__amount', output_field=DecimalField(max_digits=18, decimal_places=2))
+            ).aggregate(
+                total=Sum('income')
+            )['total'] or Decimal('0.00'),
         }
 
         response.context_data['summary_metrics'] = metrics
@@ -536,19 +543,18 @@ class ProjectAdmin(admin.ModelAdmin):
 class TaskAdmin(admin.ModelAdmin):
     list_display = (
         'name',
-        'display_status',
         'project',
         'assigned_to',
+        'status',
         'priority',
-        'display_due_date',
-        'display_time_tracking',
-        'display_completion',
+        'due_date',
+        'estimated_hours',
+        'actual_hours',
     )
 
     list_filter = (
         'status',
         'priority',
-        'task_type',
         'project',
         'assigned_to',
         ('due_date', DateRangeFilter),
@@ -571,7 +577,7 @@ class TaskAdmin(admin.ModelAdmin):
                 'name',
                 'description',
                 'project',
-                ('status', 'priority', 'task_type'),
+                ('status', 'priority'),
             )
         }),
         ('Assignment', {
@@ -590,7 +596,6 @@ class TaskAdmin(admin.ModelAdmin):
         }),
         ('Additional Information', {
             'fields': (
-                'github_issue',
                 'tags',
                 'notes',
             ),
@@ -605,62 +610,6 @@ class TaskAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at', 'started_at', 'completed_at')
     filter_horizontal = ('dependencies',)
 
-    def display_status(self, obj):
-        colors = {
-            'pending': '#FFA500',  # Orange
-            'in_progress': '#1E90FF',  # Blue
-            'review': '#9370DB',  # Purple
-            'completed': '#32CD32',  # Green
-            'blocked': '#DC143C',  # Red
-            'cancelled': '#808080'  # Grey
-        }
-        return format_html(
-            '<span style="color: {}; font-weight: bold;">{}</span>',
-            colors.get(obj.status, 'black'),
-            obj.get_status_display()
-        )
-
-    display_status.short_description = 'Status'
-
-    def display_due_date(self, obj):
-        if obj.is_overdue:
-            days_overdue = (timezone.now().date() - obj.due_date).days
-            return format_html(
-                '<span style="color: red;">⚠️ {} ({} days overdue)</span>',
-                obj.due_date.strftime('%Y-%m-%d'),
-                days_overdue
-            )
-        return obj.due_date.strftime('%Y-%m-%d')
-
-    display_due_date.short_description = 'Due Date'
-
-    def display_time_tracking(self, obj):
-        if obj.estimated_hours > 0:
-            percentage = (obj.actual_hours / obj.estimated_hours) * 100
-            color = 'green' if percentage <= 100 else 'red'
-            return format_html(
-                '{:.1f}h / {:.1f}h <span style="color: {};">({:.0f}%)</span>',
-                obj.actual_hours,
-                obj.estimated_hours,
-                color,
-                percentage
-            )
-        return f"{obj.actual_hours}h"
-
-    display_time_tracking.short_description = 'Time Spent'
-
-    def display_completion(self, obj):
-        percentage = obj.completion_percentage
-        return format_html(
-            '<div style="width: 100px; background-color: #f1f1f1;">'
-            '<div style="width: {}px; background-color: #4CAF50; height: 20px;">'
-            '</div></div> {:.1f}%',
-            percentage,
-            percentage
-        )
-
-    display_completion.short_description = 'Completion'
-
     actions = ['mark_as_in_progress', 'mark_as_completed', 'mark_as_blocked']
 
     def mark_as_in_progress(self, request, queryset):
@@ -668,21 +617,18 @@ class TaskAdmin(admin.ModelAdmin):
             status='in_progress',
             started_at=timezone.now()
         )
-
-    mark_as_in_progress.short_description = "Mark selected tasks as in progress"
+    mark_as_in_progress.short_description = "Mark as in progress"
 
     def mark_as_completed(self, request, queryset):
         queryset.update(
             status='completed',
             completed_at=timezone.now()
         )
-
-    mark_as_completed.short_description = "Mark selected tasks as completed"
+    mark_as_completed.short_description = "Mark as completed"
 
     def mark_as_blocked(self, request, queryset):
         queryset.update(status='blocked')
-
-    mark_as_blocked.short_description = "Mark selected tasks as blocked"
+    mark_as_blocked.short_description = "Mark as blocked"
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
@@ -690,9 +636,8 @@ class TaskAdmin(admin.ModelAdmin):
         )
 
     def save_model(self, request, obj, form, change):
-        if not change:  # If creating new task
-            if not obj.assigned_to:
-                obj.assigned_to = request.user
+        if not change and not obj.assigned_to:
+            obj.assigned_to = request.user
         super().save_model(request, obj, form, change)
 
 
