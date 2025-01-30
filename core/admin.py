@@ -1,11 +1,15 @@
 import datetime
-from django.db.models import Sum, Count, Q
+
+# Register Models
 from django.contrib import admin
-from .models import User, Client, Project, Task, Income, Expense, Invoice
-from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.db.models import Q
+from django.db.models import Sum, Count
+from django.utils import timezone
 from django.utils.html import format_html
-from django.db.models import Sum, Count, Q
 from rangefilter.filters import DateRangeFilter
+
+from .models import User, Client, Project, Task, Income, Expense, Invoice
 
 # Customize Admin Header
 admin.site.site_header = "TitansManager Admin"
@@ -16,13 +20,6 @@ admin.site.index_title = "Welcome to TitansManager Admin"
 class TaskInline(admin.TabularInline):
     model = Task
     extra = 1
-
-# Register Models
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.utils.html import format_html
-from django.db.models import Count, Q
-from rangefilter.filters import DateRangeFilter
 
 
 @admin.register(User)
@@ -358,11 +355,6 @@ class ClientAdmin(admin.ModelAdmin):
         return response
 
 
-from django.contrib import admin
-from django.utils.html import format_html
-from django.db.models import Sum, Count, Q
-from rangefilter.filters import DateRangeFilter
-
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
@@ -538,12 +530,6 @@ class ProjectAdmin(admin.ModelAdmin):
         response.context_data['summary_metrics'] = metrics
         return response
 
-
-from django.contrib import admin
-from django.utils.html import format_html
-from django.db.models import Q
-from rangefilter.filters import DateRangeFilter
-from django.utils import timezone
 
 
 @admin.register(Task)
@@ -911,13 +897,6 @@ class ExpenseAdmin(admin.ModelAdmin):
         return response
 
 
-from django.contrib import admin
-from django.utils.html import format_html
-from django.db.models import Sum, Q
-from rangefilter.filters import DateRangeFilter
-from django.utils import timezone
-
-
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
     list_display = (
@@ -927,15 +906,12 @@ class InvoiceAdmin(admin.ModelAdmin):
         'display_amount',
         'display_status',
         'date',
-        'due_date',
-        'display_balance'
+        'due_date'
     )
 
     list_filter = (
         'status',
-        'payment_method',
-        ('date', DateRangeFilter),
-        ('due_date', DateRangeFilter),
+        'date',
         'client',
         'project',
     )
@@ -944,17 +920,7 @@ class InvoiceAdmin(admin.ModelAdmin):
         'invoice_number',
         'client__name',
         'project__name',
-        'payment_reference',
         'notes',
-    )
-
-    readonly_fields = (
-        'invoice_number',
-        'created_at',
-        'updated_at',
-        'created_by',
-        'total_amount',
-        'balance_due',
     )
 
     fieldsets = (
@@ -963,136 +929,41 @@ class InvoiceAdmin(admin.ModelAdmin):
                 'invoice_number',
                 ('client', 'project'),
                 ('date', 'due_date'),
+                'amount',
                 'status',
-            )
-        }),
-        ('Financial Details', {
-            'fields': (
-                ('amount', 'tax_rate'),
-                ('tax_amount', 'discount'),
-                ('total_amount', 'balance_due'),
-            )
-        }),
-        ('Payment Information', {
-            'fields': (
-                ('payment_method', 'payment_reference'),
-                'paid_amount',
-                'paid_date',
-            )
-        }),
-        ('Additional Information', {
-            'fields': (
                 'notes',
-                'terms',
-                'private_notes',
-                'pdf_file',
-            ),
-            'classes': ('collapse',)
-        }),
-        ('System Information', {
-            'fields': (
-                'created_by',
-                'created_at',
-                'updated_at',
-            ),
-            'classes': ('collapse',)
+            )
         }),
     )
 
     def display_amount(self, obj):
-        return format_html(
-            '<strong>${:,.2f}</strong>',
-            obj.total_amount
-        )
+        return f"${obj.amount:,.2f}"
 
-    display_amount.short_description = 'Total Amount'
+    display_amount.short_description = 'Amount'
 
     def display_status(self, obj):
         colors = {
-            'draft': '#808080',  # Grey
-            'sent': '#1E90FF',  # Blue
-            'partially_paid': '#FFA500',  # Orange
-            'paid': '#32CD32',  # Green
-            'overdue': '#DC143C',  # Red
-            'cancelled': '#A9A9A9',  # Dark Grey
-            'refunded': '#9370DB'  # Purple
+            'draft': 'grey',
+            'sent': 'blue',
+            'paid': 'green',
+            'cancelled': 'red'
         }
-
-        status_text = obj.get_status_display()
-        if obj.is_overdue:
-            status_text = f"Overdue ({obj.days_overdue} days)"
-
         return format_html(
-            '<span style="color: {}; font-weight: bold;">{}</span>',
+            '<span style="color: {};">{}</span>',
             colors.get(obj.status, 'black'),
-            status_text
+            obj.get_status_display()
         )
 
     display_status.short_description = 'Status'
 
-    def display_balance(self, obj):
-        if obj.balance_due > 0:
-            return format_html(
-                '<span style="color: red;">${:,.2f}</span>',
-                obj.balance_due
-            )
-        return format_html(
-            '<span style="color: green;">Paid</span>'
-        )
-
-    display_balance.short_description = 'Balance Due'
-
-    actions = ['mark_as_paid', 'mark_as_sent', 'mark_as_overdue']
+    actions = ['mark_as_paid', 'mark_as_sent']
 
     def mark_as_paid(self, request, queryset):
-        queryset.update(
-            status='paid',
-            paid_date=timezone.now().date(),
-            paid_amount=F('total_amount')
-        )
+        queryset.update(status='paid')
 
     mark_as_paid.short_description = "Mark selected invoices as paid"
 
     def mark_as_sent(self, request, queryset):
-        queryset.filter(status='draft').update(status='sent')
+        queryset.update(status='sent')
 
     mark_as_sent.short_description = "Mark selected invoices as sent"
-
-    def mark_as_overdue(self, request, queryset):
-        queryset.filter(Q(status='sent') | Q(status='partially_paid')) \
-            .filter(due_date__lt=timezone.now().date()) \
-            .update(status='overdue')
-
-    mark_as_overdue.short_description = "Mark selected invoices as overdue"
-
-    def save_model(self, request, obj, form, change):
-        if not change:  # If creating new invoice
-            obj.created_by = request.user
-        super().save_model(request, obj, form, change)
-
-    def changelist_view(self, request, extra_context=None):
-        response = super().changelist_view(request, extra_context)
-
-        try:
-            queryset = response.context_data['cl'].queryset
-        except (AttributeError, KeyError):
-            return response
-
-        metrics = {
-            'total_invoiced': queryset.aggregate(
-                total=Sum('amount'))['total'] or 0,
-            'total_received': queryset.aggregate(
-                total=Sum('paid_amount'))['total'] or 0,
-            'total_outstanding': queryset.aggregate(
-                total=Sum('balance_due'))['total'] or 0,
-            'overdue_amount': queryset.filter(status='overdue').aggregate(
-                total=Sum('balance_due'))['total'] or 0,
-        }
-
-        response.context_data['summary_metrics'] = metrics
-        return response
-
-    class Media:
-        css = {
-            'all': ('admin/css/admin.css',)
-        }

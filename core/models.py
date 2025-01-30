@@ -1,11 +1,13 @@
 import datetime
+from decimal import Decimal
 
-from django.db import models
 from django.contrib.auth.models import AbstractUser
-
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
+from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 
 
 class User(AbstractUser):
@@ -224,9 +226,7 @@ class Client(models.Model):
         return self.outstanding_invoices.aggregate(
             total=models.Sum('amount'))['total'] or 0
 
-from django.core.validators import MinValueValidator
-from django.core.exceptions import ValidationError
-from django.utils import timezone
+
 
 class Project(models.Model):
     STATUS_CHOICES = [
@@ -344,9 +344,6 @@ class Project(models.Model):
             return (self.actual_end_date - self.actual_start_date).days
         return (self.end_date - self.start_date).days
 
-
-from django.core.validators import MinValueValidator
-from django.utils import timezone
 
 
 class Task(models.Model):
@@ -706,157 +703,44 @@ class Expense(models.Model):
         return False
 
 
-from django.core.validators import MinValueValidator
-from django.utils import timezone
-import uuid
-
-
 class Invoice(models.Model):
     STATUS_CHOICES = [
         ('draft', 'Draft'),
         ('sent', 'Sent'),
-        ('partially_paid', 'Partially Paid'),
         ('paid', 'Paid'),
-        ('overdue', 'Overdue'),
-        ('cancelled', 'Cancelled'),
-        ('refunded', 'Refunded')
-    ]
-
-    PAYMENT_METHOD_CHOICES = [
-        ('bank_transfer', 'Bank Transfer'),
-        ('credit_card', 'Credit Card'),
-        ('cheque', 'Cheque'),
-        ('cash', 'Cash'),
-        ('paypal', 'PayPal'),
-        ('other', 'Other')
+        ('cancelled', 'Cancelled')
     ]
 
     # Basic Information
     invoice_number = models.CharField(max_length=50, unique=True)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='invoices')
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='invoices')
+    client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name='invoices')
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='invoices')
 
-    # Dates
-    date = models.DateField(help_text="Invoice issue date")
-    due_date = models.DateField(help_text="Payment due date")
-    paid_date = models.DateField(null=True, blank=True)
-
-    # Financial Details
-    amount = models.DecimalField(max_digits=18, decimal_places=2, validators=[MinValueValidator(0)])
-    paid_amount = models.DecimalField(max_digits=18, decimal_places=2, default=0)
-    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    tax_amount = models.DecimalField(max_digits=18, decimal_places=2, default=0)
-    discount = models.DecimalField(max_digits=18, decimal_places=2, default=0)
-
-    # Status and Payment
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='draft')
-    payment_method = models.CharField(
-        max_length=50,
-        choices=PAYMENT_METHOD_CHOICES,
-        null=True,
-        blank=True
-    )
-    payment_reference = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        help_text="Reference number for the payment"
+    # Dates and Amount
+    date = models.DateField()
+    due_date = models.DateField()
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.00'))]
     )
 
-    # Additional Information
+    # Status
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='draft'
+    )
+
+    # Notes
     notes = models.TextField(blank=True, null=True)
-    terms = models.TextField(blank=True, null=True)
-    private_notes = models.TextField(blank=True, null=True, help_text="Internal notes")
-
-    # File Attachments
-    pdf_file = models.FileField(upload_to='invoices/pdf/%Y/%m/', null=True, blank=True)
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        'User',
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='created_invoices'
-    )
 
     class Meta:
-        ordering = ['-date', '-invoice_number']
-        indexes = [
-            models.Index(fields=['invoice_number']),
-            models.Index(fields=['status']),
-            models.Index(fields=['due_date']),
-            models.Index(fields=['client']),
-        ]
+        ordering = ['-date']
 
     def __str__(self):
-        return f"Invoice #{self.invoice_number} - {self.client.name} (${self.amount:,.2f})"
-
-    def save(self, *args, **kwargs):
-        if not self.invoice_number:
-            # Generate invoice number: INV-YYYYMM-XXXX
-            year_month = timezone.now().strftime('%Y%m')
-            last_invoice = Invoice.objects.filter(
-                invoice_number__startswith=f'INV-{year_month}'
-            ).order_by('invoice_number').last()
-
-            if last_invoice:
-                last_number = int(last_invoice.invoice_number.split('-')[-1])
-                new_number = last_number + 1
-            else:
-                new_number = 1
-
-            self.invoice_number = f'INV-{year_month}-{str(new_number).zfill(4)}'
-
-        # Calculate tax amount
-        if self.tax_rate > 0:
-            self.tax_amount = (self.amount * self.tax_rate) / 100
-
-        super().save(*args, **kwargs)
-
-    @property
-    def total_amount(self):
-        """Calculate total amount including tax and discount"""
-        return self.amount + self.tax_amount - self.discount
-
-    @property
-    def balance_due(self):
-        """Calculate remaining balance"""
-        return self.total_amount - self.paid_amount
-
-    @property
-    def is_overdue(self):
-        """Check if invoice is overdue"""
-        if self.status not in ['paid', 'cancelled', 'refunded']:
-            return self.due_date < timezone.now().date()
-        return False
-
-    @property
-    def days_overdue(self):
-        """Calculate number of days overdue"""
-        if self.is_overdue:
-            return (timezone.now().date() - self.due_date).days
-        return 0
-
-    def mark_as_paid(self, payment_method=None, payment_reference=None, paid_date=None):
-        """Mark invoice as paid"""
-        self.status = 'paid'
-        self.payment_method = payment_method
-        self.payment_reference = payment_reference
-        self.paid_date = paid_date or timezone.now().date()
-        self.paid_amount = self.total_amount
-        self.save()
-
-    def record_partial_payment(self, amount, payment_method=None, payment_reference=None):
-        """Record a partial payment"""
-        self.paid_amount += amount
-        self.payment_method = payment_method
-        self.payment_reference = payment_reference
-
-        if self.paid_amount >= self.total_amount:
-            self.status = 'paid'
-        else:
-            self.status = 'partially_paid'
-
-        self.save()
+        return f"Invoice #{self.invoice_number} - {self.client.name}"
