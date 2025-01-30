@@ -1,14 +1,15 @@
 import datetime
+from decimal import Decimal
 
+import django
 # Register Models
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.db.models import Count
 from django.db.models import Q
-from django.db.models import Sum, Count
 from django.db.models import Sum, DecimalField
 from django.utils import timezone
 from django.utils.html import format_html
-from decimal import Decimal
 from rangefilter.filters import DateRangeFilter
 
 from .models import User, Client, Project, Task, Income, Expense, Invoice
@@ -643,88 +644,33 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(Income)
 class IncomeAdmin(admin.ModelAdmin):
-    list_display = ('display_amount', 'client', 'project', 'income_type',
-                    'date', 'status', 'payment_method', 'display_overdue')
+    list_display = (
+        'client',
+        'project',
+        'display_amount',
+        'date',
+        'invoice'
+    )
 
     list_filter = (
-        'status',
-        'income_type',
-        'payment_method',
-        ('date', DateRangeFilter),
         'client',
-        'project'
+        'project',
+        ('date', DateRangeFilter),
     )
 
     search_fields = (
         'client__name',
         'project__name',
-        'payment_reference',
-        'description'
-    )
-
-    readonly_fields = ('created_at', 'updated_at', 'tax_amount', 'total_amount')
-
-    fieldsets = (
-        ('Basic Information', {
-            'fields': (
-                'client', 'project', 'income_type', 'amount', 'description'
-            )
-        }),
-        ('Dates', {
-            'fields': (
-                'date', 'expected_date', 'received_date'
-            )
-        }),
-        ('Payment Details', {
-            'fields': (
-                'payment_method', 'payment_reference', 'status', 'invoice'
-            )
-        }),
-        ('Tax Information', {
-            'fields': (
-                'tax_rate', 'tax_amount'
-            )
-        }),
-        ('Additional Information', {
-            'fields': ('notes',),
-            'classes': ('collapse',)
-        }),
-        ('System Information', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        })
     )
 
     def display_amount(self, obj):
-        return f"${obj.amount:,.2f}"
+        formatted_amount = f"${float(obj.amount):,.2f}"
+        return format_html(
+            '<span>{}</span>',
+            formatted_amount
+        )
 
     display_amount.short_description = 'Amount'
-    display_amount.admin_order_field = 'amount'
-
-    def display_overdue(self, obj):
-        if obj.is_overdue:
-            return f"⚠️ {obj.days_overdue} days"
-        return "✓"
-
-    display_overdue.short_description = 'Overdue'
-
-    actions = ['mark_as_received', 'mark_as_pending']
-
-    def mark_as_received(self, request, queryset):
-        queryset.update(
-            status='received',
-            received_date=datetime.date.today()
-        )
-
-    mark_as_received.short_description = "Mark selected incomes as received"
-
-    def mark_as_pending(self, request, queryset):
-        queryset.update(
-            status='pending',
-            received_date=None
-        )
-
-    mark_as_pending.short_description = "Mark selected incomes as pending"
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context)
@@ -736,13 +682,14 @@ class IncomeAdmin(admin.ModelAdmin):
 
         metrics = {
             'total_income': queryset.aggregate(
-                total=Sum('amount'))['total'] or 0,
-            'pending_income': queryset.filter(
-                status='pending').aggregate(
-                total=Sum('amount'))['total'] or 0,
-            'received_income': queryset.filter(
-                status='received').aggregate(
-                total=Sum('amount'))['total'] or 0
+                total=Sum('amount', output_field=DecimalField(max_digits=18, decimal_places=2))
+            )['total'] or Decimal('0.00'),
+            'client_totals': queryset.values('client__name') \
+                .annotate(total=Sum('amount')) \
+                .order_by('-total'),
+            'project_totals': queryset.values('project__name') \
+                .annotate(total=Sum('amount')) \
+                .order_by('-total')
         }
 
         response.context_data['summary_metrics'] = metrics
@@ -751,76 +698,37 @@ class IncomeAdmin(admin.ModelAdmin):
 
 @admin.register(Expense)
 class ExpenseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'amount', 'display_total', 'date',
-                    'status', 'is_recurring', 'receipt_link')
+    list_display = (
+        'title',
+        'category',
+        'display_amount',
+        'vendor',
+        'date',
+        'status',
+        'payment_method',
+    )
+
     list_filter = (
         'status',
         'category',
         'payment_method',
-        'is_recurring',
         ('date', DateRangeFilter),
-        'tax_status',
-    )
-    search_fields = ('title', 'description', 'vendor', 'invoice_number')
-    readonly_fields = ('created_at', 'updated_at', 'total_amount')
-
-    fieldsets = (
-        ('Basic Information', {
-            'fields': ('title', 'description', 'amount', 'tax_amount', 'category')
-        }),
-        ('Payment Details', {
-            'fields': ('payment_method', 'payment_reference', 'tax_status',
-                       'date', 'due_date', 'paid_date')
-        }),
-        ('Recurring Settings', {
-            'fields': ('is_recurring', 'recurring_frequency', 'recurring_end_date'),
-            'classes': ('collapse',)
-        }),
-        ('Documentation', {
-            'fields': ('receipt', 'invoice_number', 'vendor', 'vendor_tax_number')
-        }),
-        ('Approval Information', {
-            'fields': ('status', 'submitted_by', 'approved_by', 'notes')
-        }),
-        ('System Information', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
     )
 
-    def display_total(self, obj):
-        return f"${obj.total_amount:.2f}"
+    search_fields = (
+        'title',
+        'vendor',
+        'description',
+    )
 
-    display_total.short_description = 'Total Amount'
+    def display_amount(self, obj):
+        formatted_amount = f"${float(obj.amount):,.2f}"
+        return format_html(
+            '<span>{}</span>',
+            formatted_amount
+        )
 
-    def receipt_link(self, obj):
-        if obj.receipt:
-            return format_html('<a href="{}" target="_blank">View Receipt</a>',
-                               obj.receipt.url)
-        return "No receipt"
-
-    receipt_link.short_description = 'Receipt'
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.select_related('submitted_by', 'approved_by')
-
-    def save_model(self, request, obj, form, change):
-        if not change:  # If creating new expense
-            obj.submitted_by = request.user
-        super().save_model(request, obj, form, change)
-
-    actions = ['mark_as_approved', 'mark_as_paid']
-
-    def mark_as_approved(self, request, queryset):
-        queryset.update(status='approved', approved_by=request.user)
-
-    mark_as_approved.short_description = "Mark selected expenses as approved"
-
-    def mark_as_paid(self, request, queryset):
-        queryset.update(status='paid', paid_date=datetime.date.today())
-
-    mark_as_paid.short_description = "Mark selected expenses as paid"
+    display_amount.short_description = 'Amount'
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context)
@@ -831,11 +739,15 @@ class ExpenseAdmin(admin.ModelAdmin):
             return response
 
         metrics = {
-            'total_amount': queryset.aggregate(
-                total=Sum('amount') + Sum('tax_amount'))['total'] or 0,
-            'pending_amount': queryset.filter(
-                status='pending').aggregate(
-                total=Sum('amount') + Sum('tax_amount'))['total'] or 0,
+            'total_expenses': queryset.aggregate(
+                total=Sum('amount', output_field=DecimalField(max_digits=18, decimal_places=2))
+            )['total'] or Decimal('0.00'),
+            'category_totals': queryset.values('category') \
+                .annotate(total=Sum('amount')) \
+                .order_by('-total'),
+            'monthly_totals': queryset.values('date__month', 'date__year') \
+                .annotate(total=Sum('amount')) \
+                .order_by('date__year', 'date__month'),
         }
 
         response.context_data['summary_metrics'] = metrics

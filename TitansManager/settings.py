@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rangefilter",
     "rest_framework",
     "rest_framework_simplejwt",
+    "django.contrib.humanize",
     'core',
 ]
 

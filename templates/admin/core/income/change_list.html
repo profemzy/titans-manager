@@ -1,0 +1,48 @@
+{% extends "admin/change_list.html" %}
+{% load humanize %}
+
+{% block content_title %}
+    <h1>Income Management</h1>
+    <div style="margin: 20px auto; max-width: 800px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: #333; margin-bottom: 20px;">Financial Summary</h2>
+            <div style="font-size: 24px; color: #2ecc71; font-weight: bold;">
+                Total Income: ${{ summary_metrics.total_income|floatformat:2|intcomma }}
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; gap: 40px;">
+            <!-- Client Summary -->
+            <div style="flex: 1; background-color: #f8f9fa; padding: 20px; border-radius: 6px;">
+                <h3 style="color: #444; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+                    Income by Client
+                </h3>
+                <ul style="list-style: none; padding: 0;">
+                    {% for item in summary_metrics.client_totals %}
+                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">{{ item.client__name }}</span>
+                            <span style="color: #2ecc71; font-weight: bold;">${{ item.total|floatformat:2|intcomma }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Project Summary -->
+            <div style="flex: 1; background-color: #f8f9fa; padding: 20px; border-radius: 6px;">
+                <h3 style="color: #444; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+                    Income by Project
+                </h3>
+                <ul style="list-style: none; padding: 0;">
+                    {% for item in summary_metrics.project_totals %}
+                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <span style="color: #666;">{{ item.project__name }}</span>
+                            <span style="color: #2ecc71; font-weight: bold;">${{ item.total|floatformat:2|intcomma }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}{{ block.super }}{% endblock %}
