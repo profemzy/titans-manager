@@ -923,6 +923,8 @@ class InvoiceAdmin(admin.ModelAdmin):
         'notes',
     )
 
+    readonly_fields = ('invoice_number',)
+
     fieldsets = (
         ('Basic Information', {
             'fields': (

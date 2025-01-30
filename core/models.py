@@ -712,7 +712,7 @@ class Invoice(models.Model):
     ]
 
     # Basic Information
-    invoice_number = models.CharField(max_length=50, unique=True)
+    invoice_number = models.CharField(max_length=50, unique=True, blank=True)
     client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name='invoices')
     project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='invoices')
 
@@ -744,3 +744,24 @@ class Invoice(models.Model):
 
     def __str__(self):
         return f"Invoice #{self.invoice_number} - {self.client.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            # Generate invoice number format: INV-YYYYMM-XXXX
+            year_month = timezone.now().strftime('%Y%m')
+            last_invoice = Invoice.objects.filter(
+                invoice_number__startswith=f'INV-{year_month}'
+            ).order_by('invoice_number').last()
+
+            if last_invoice:
+                # Get the last sequence number and increment it
+                last_number = int(last_invoice.invoice_number.split('-')[-1])
+                new_number = last_number + 1
+            else:
+                # If no invoice exists for this month, start with 1
+                new_number = 1
+
+            # Create new invoice number
+            self.invoice_number = f'INV-{year_month}-{str(new_number).zfill(4)}'
+
+        super().save(*args, **kwargs)
