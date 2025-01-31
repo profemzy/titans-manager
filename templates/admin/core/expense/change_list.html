@@ -3,23 +3,28 @@
 
 {% block content_title %}
     <h1>Expense Management</h1>
-    <div style="margin: 20px auto; max-width: 800px; padding: 20px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="color: #333; margin-bottom: 20px;">Expense Summary</h2>
-            <div style="font-size: 24px; color: #e74c3c; font-weight: bold;">
+    <div style="margin: 20px auto; max-width: 800px; padding: 15px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 25px;">
+            <h2 style="color: #333; margin-bottom: 20px; font-size: clamp(1.5rem, 4vw, 2rem);">Expense Summary</h2>
+            <div style="font-size: clamp(1.2rem, 3vw, 1.5rem); color: #e74c3c; font-weight: bold;">
                 Total Expenses: ${{ summary_metrics.total_expenses|floatformat:2|intcomma }}
             </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; gap: 40px;">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            @media (min-width: 768px) {
+                display: flex;
+                flex-direction: row;
+                gap: 40px;
+            }
             <!-- Category Summary -->
-            <div style="flex: 1; background-color: #f8f9fa; padding: 20px; border-radius: 6px;">
-                <h3 style="color: #444; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+            <div style="flex: 1; background-color: #f8f9fa; padding: 15px; border-radius: 6px;">
+                <h3 style="color: #444; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; font-size: clamp(1.1rem, 3vw, 1.3rem);">
                     Expenses by Category
                 </h3>
-                <ul style="list-style: none; padding: 0;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
                     {% for item in summary_metrics.category_totals %}
-                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: clamp(0.9rem, 2.5vw, 1rem);">
                             <span style="color: #666;">{{ item.category|title }}</span>
                             <span style="color: #e74c3c; font-weight: bold;">${{ item.total|floatformat:2|intcomma }}</span>
                         </li>
@@ -28,13 +33,13 @@
             </div>
 
             <!-- Monthly Summary -->
-            <div style="flex: 1; background-color: #f8f9fa; padding: 20px; border-radius: 6px;">
-                <h3 style="color: #444; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px;">
+            <div style="flex: 1; background-color: #f8f9fa; padding: 15px; border-radius: 6px;">
+                <h3 style="color: #444; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; font-size: clamp(1.1rem, 3vw, 1.3rem);">
                     Monthly Expenses
                 </h3>
-                <ul style="list-style: none; padding: 0;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
                     {% for item in summary_metrics.monthly_totals %}
-                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
+                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: clamp(0.9rem, 2.5vw, 1rem);">
                             <span style="color: #666;">
                                 {% with month=item.date__month|stringformat:"02d" %}
                                     {{ item.date__year }}-{{ month }}

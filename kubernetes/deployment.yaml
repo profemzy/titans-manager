@@ -24,7 +24,7 @@ spec:
                 - linux
       initContainers:
       - name: migrate
-        image: wackopsprodacr.azurecr.io/tms:0.0.4
+        image: wackopsprodacr.azurecr.io/tms:0.1.1
         command: ["python", "manage.py", "migrate"]
         env:
         - name: DJANGO_SECRET_KEY
@@ -47,6 +47,16 @@ spec:
             configMapKeyRef:
               name: tms-config
               key: DJANGO_ALLOWED_HOSTS
+        - name: AZURE_ACCOUNT_NAME
+          valueFrom:
+            secretKeyRef:
+              name: azure-storage-secret
+              key: AZURE_ACCOUNT_NAME
+        - name: AZURE_ACCOUNT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: azure-storage-secret
+              key: AZURE_ACCOUNT_KEY
         - name: DATABASE_ENGINE
           value: postgresql_psycopg2
         - name: DATABASE_NAME
@@ -76,7 +86,7 @@ spec:
               key: DATABASE_PORT
       containers:
       - name: titans-manager
-        image: wackopsprodacr.azurecr.io/tms:0.0.4
+        image: wackopsprodacr.azurecr.io/tms:0.1.1
         ports:
         - containerPort: 8000
         env:
