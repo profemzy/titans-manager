@@ -1,12 +1,27 @@
+import base64
+import os
+
 from django.conf import settings
 from storages.backends.azure_storage import AzureStorage
+from azure.storage.blob._shared.authentication import SharedKeyCredentialPolicy
 
 
 class AzureReceiptStorage(AzureStorage):
+    def __init__(self):
+        super().__init__()
+        # Ensure the account key is properly padded for base64
+        if hasattr(settings, 'AZURE_ACCOUNT_KEY'):
+            # Add padding if needed
+            key = settings.AZURE_ACCOUNT_KEY
+            # Add padding characters if needed
+            padding = 4 - (len(key) % 4)
+            if padding != 4:
+                key = key + ('=' * padding)
+            self.account_key = key
+
     account_name = settings.AZURE_ACCOUNT_NAME
-    account_key = settings.AZURE_ACCOUNT_KEY
     azure_container = settings.AZURE_RECEIPT_CONTAINER
-    expiration_secs = settings.AZURE_EXPIRATION_SECS
+    expiration_secs = getattr(settings, 'AZURE_EXPIRATION_SECS', 60 * 60 * 24)  # Default 24 hours
 
     def get_valid_name(self, name):
         """
@@ -26,9 +41,30 @@ class AzureReceiptStorage(AzureStorage):
         from datetime import datetime
         import os
 
-        if self.exists(name):
-            dir_name, file_name = os.path.split(name)
-            file_root, file_ext = os.path.splitext(file_name)
+        dir_name, file_name = os.path.split(name)
+        file_root, file_ext = os.path.splitext(file_name)
+
+        while self.exists(name):
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             name = os.path.join(dir_name, f'{file_root}_{timestamp}{file_ext}')
+
+            if max_length:
+                name = self._get_valid_path(name, max_length)
+
         return name
+
+    def _get_valid_path(self, name, max_length):
+        """
+        Ensure the file path doesn't exceed max_length by truncating the file name part
+        while preserving the extension
+        """
+        dir_name, file_name = os.path.split(name)
+        file_root, file_ext = os.path.splitext(file_name)
+
+        # Calculate maximum length for file_root
+        max_root_length = max_length - len(dir_name) - len(file_ext) - 2  # -2 for separators
+        if max_root_length < 0:
+            max_root_length = 0
+
+        file_root = file_root[:max_root_length]
+        return os.path.join(dir_name, f'{file_root}{file_ext}')

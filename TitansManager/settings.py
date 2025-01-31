@@ -270,10 +270,10 @@ USE_TZ = True
 USE_L10N = True
 USE_I18N = True
 
-AZURE_ACCOUNT_NAME = os.environ.get("AZURE_ACCOUNT_NAME", "your_account_name_")
-AZURE_ACCOUNT_KEY = os.environ.get("AZURE_ACCOUNT_NAME", "your_account_key_")
-AZURE_RECEIPT_CONTAINER = 'tms-receipts'
-AZURE_EXPIRATION_SECS = 60 * 60 * 24  # 24 hours URL expiration
+AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME')
+AZURE_ACCOUNT_KEY = os.environ.get('AZURE_ACCOUNT_KEY')
+AZURE_RECEIPT_CONTAINER = os.environ.get('AZURE_RECEIPT_CONTAINER', 'tms-receipts')
+AZURE_EXPIRATION_SECS = int(os.environ.get('AZURE_EXPIRATION_SECS', 86400))
 
 # Default file storage
 DEFAULT_FILE_STORAGE = 'custom_storage.AzureReceiptStorage'
