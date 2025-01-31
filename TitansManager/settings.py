@@ -265,7 +265,15 @@ LOGIN_URL = '/titans-admin/login/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Timezone settings
-TIME_ZONE = 'America/Vancouver'  # Pacific Time
-USE_TZ = True                    # Enable timezone support
-USE_L10N = True                  # Enable localization
-USE_I18N = True                  # Enable internationalization
+TIME_ZONE = 'America/Vancouver'
+USE_TZ = True
+USE_L10N = True
+USE_I18N = True
+
+AZURE_ACCOUNT_NAME = os.environ.get("AZURE_ACCOUNT_NAME", "your_account_name_")
+AZURE_ACCOUNT_KEY = os.environ.get("AZURE_ACCOUNT_NAME", "your_account_key_")
+AZURE_RECEIPT_CONTAINER = 'tms-receipts'
+AZURE_EXPIRATION_SECS = 60 * 60 * 24  # 24 hours URL expiration
+
+# Default file storage
+DEFAULT_FILE_STORAGE = 'custom_storage.AzureReceiptStorage'

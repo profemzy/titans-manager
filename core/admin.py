@@ -1,8 +1,5 @@
-import datetime
 from decimal import Decimal
 
-import django
-# Register Models
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Count

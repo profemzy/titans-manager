@@ -9,6 +9,8 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 
+from core.custom_storage import AzureReceiptStorage
+
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -575,7 +577,7 @@ class Income(models.Model):
             return (datetime.date.today() - self.expected_date).days
         return 0
 
-# Expense Model
+
 class Expense(models.Model):
     CATEGORY_CHOICES = [
         ('rent', 'Rent/Lease'),
@@ -644,7 +646,6 @@ class Expense(models.Model):
     recurring_end_date = models.DateField(null=True, blank=True)
 
     # Documentation
-    receipt = models.FileField(upload_to='receipts/%Y/%m/', null=True, blank=True)
     invoice_number = models.CharField(max_length=100, blank=True, null=True)
     vendor = models.CharField(max_length=200, blank=True, null=True)
     vendor_tax_number = models.CharField(max_length=50, blank=True, null=True)
@@ -701,6 +702,22 @@ class Expense(models.Model):
         if self.due_date and not self.paid_date:
             return self.due_date < datetime.date.today()
         return False
+
+    def receipt_upload_path(instance, filename):
+        """
+        Generate the upload path for receipt files.
+        Format: receipts/YYYY/MM/client_name/filename
+        """
+        from django.utils.text import slugify
+        date = instance.date
+        return f'receipts/{date.year}/{date.month:02d}/{slugify(instance.vendor or "unknown")}/{filename}'
+
+    receipt = models.FileField(
+        upload_to=receipt_upload_path,
+        null=True,
+        blank=True,
+        storage=AzureReceiptStorage()
+    )
 
 
 class Invoice(models.Model):
