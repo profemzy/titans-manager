@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
+from socket import gethostbyname, gethostname
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,8 +28,20 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-1ffaq*8vo0!kjz
 # DEBUG = True
 DEBUG = bool(os.environ.get("DEBUG", default=1))
 
-# ALLOWED_HOSTS = []
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'tms.ops.infotitans.ca',
+    gethostname(),  # Add hostname
+    gethostbyname(gethostname()),  # Add host IP
+]
+
+# Kubernetes sets POD_IP env variable for pods
+POD_IP = os.getenv('POD_IP')
+if POD_IP:
+    ALLOWED_HOSTS.append(POD_IP)
 
 
 # Application definition

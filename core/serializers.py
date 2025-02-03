@@ -1,5 +1,25 @@
 from rest_framework import serializers
 from .models import User, Client, Project, Task, Income, Expense, Invoice
+from django.db import connections
+from django.db.utils import OperationalError
+from django.core.cache import cache
+from datetime import datetime
+
+class HealthCheckSerializer(serializers.Serializer):
+    """
+    Serializer for health check endpoint.
+    """
+    status = serializers.CharField(read_only=True)
+    timestamp = serializers.DateTimeField(read_only=True)
+    database = serializers.DictField(read_only=True)
+    cache = serializers.BooleanField(read_only=True)
+    version = serializers.CharField(read_only=True)
+
+    class Meta:
+        swagger_schema_fields = {
+            "description": "Health check endpoint for system status monitoring"
+        }
+
 
 class UserSerializer(serializers.ModelSerializer):
     """
