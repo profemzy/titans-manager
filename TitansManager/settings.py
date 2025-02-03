@@ -146,6 +146,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django_session_timeout.middleware.SessionTimeoutMiddleware",
 ]
 
 # WhiteNoise configuration
@@ -256,8 +258,21 @@ CSRF_USE_SESSIONS = True
 
 # Additional Security Settings
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SESSION_COOKIE_SECURE = not DEBUG
 SECURE_SSL_REDIRECT = not DEBUG
+
+# Session Management Settings
+SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Session Security Settings
+SESSION_COOKIE_SECURE = not DEBUG  # Use secure cookies in production
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+SESSION_COOKIE_SAMESITE = 'Lax'  # Protection against CSRF
+
+# Session timeout settings
+SESSION_TIMEOUT = 3600  # 1 hour in seconds
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 
 # Login redirect settings
 LOGIN_REDIRECT_URL = '/titans-admin/'
