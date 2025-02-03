@@ -1,44 +1,98 @@
 from rest_framework import serializers
 from .models import User, Client, Project, Task, Income, Expense, Invoice
 
-# User Serializer
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User model.
+    
+    Handles user data serialization and includes basic user information.
+    """
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'role']
+        swagger_schema_fields = {
+            "description": "User object for authentication and authorization"
+        }
 
-# Client Serializer
 class ClientSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Client model.
+    
+    Includes all client information and related data.
+    """
+    total_projects = serializers.IntegerField(read_only=True)
+    total_revenue = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+
     class Meta:
         model = Client
         fields = '__all__'
+        swagger_schema_fields = {
+            "description": "Client information including projects and revenue"
+        }
 
-# Project Serializer
 class ProjectSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Project model.
+    
+    Handles project data with status tracking and financial information.
+    """
+    completion_percentage = serializers.FloatField(read_only=True)
+    
     class Meta:
         model = Project
         fields = '__all__'
+        swagger_schema_fields = {
+            "description": "Project details including status and progress"
+        }
 
-# Task Serializer
 class TaskSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Task model.
+    
+    Manages task data with assignments and time tracking.
+    """
     class Meta:
         model = Task
         fields = '__all__'
+        swagger_schema_fields = {
+            "description": "Task information with assignments and tracking"
+        }
 
-# Income Serializer
 class IncomeSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Income model.
+    
+    Handles income records with amount and date tracking.
+    """
     class Meta:
         model = Income
         fields = '__all__'
+        swagger_schema_fields = {
+            "description": "Income records with financial tracking"
+        }
 
-# Expense Serializer
 class ExpenseSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Expense model.
+    
+    Manages expense records with categorization and payment tracking.
+    """
     class Meta:
         model = Expense
         fields = '__all__'
+        swagger_schema_fields = {
+            "description": "Expense records with payment tracking"
+        }
 
-# Invoice Serializer
 class InvoiceSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Invoice model.
+    
+    Handles invoice data with status and payment tracking.
+    """
     class Meta:
         model = Invoice
         fields = '__all__'
+        swagger_schema_fields = {
+            "description": "Invoice records with payment status"
+        }
