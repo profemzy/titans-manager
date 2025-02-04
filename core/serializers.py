@@ -1,9 +1,7 @@
 from rest_framework import serializers
+
 from .models import User, Client, Project, Task, Income, Expense, Invoice
-from django.db import connections
-from django.db.utils import OperationalError
-from django.core.cache import cache
-from datetime import datetime
+
 
 class HealthCheckSerializer(serializers.Serializer):
     """

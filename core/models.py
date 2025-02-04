@@ -12,6 +12,23 @@ from django.core.validators import MinValueValidator
 from core.custom_storage import AzureReceiptStorage
 
 
+CATEGORY_CHOICES = [
+        ('rent', 'Rent/Lease'),
+        ('utilities', 'Utilities'),
+        ('software', 'Software/Tools'),
+        ('hardware', 'Hardware/Equipment'),
+        ('travel', 'Travel'),
+        ('salaries', 'Salaries/Payroll'),
+        ('marketing', 'Marketing'),
+        ('office', 'Office Supplies'),
+        ('insurance', 'Insurance'),
+        ('taxes', 'Taxes'),
+        ('maintenance', 'Maintenance'),
+        ('professional', 'Professional Services'),
+        ('training', 'Training/Education'),
+        ('other', 'Other')
+    ]
+
 class User(AbstractUser):
     ROLE_CHOICES = [
         ('Admin', 'Admin'),
@@ -257,6 +274,7 @@ class Project(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='projects')
     manager = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, related_name='managed_projects')
     team_members = models.ManyToManyField('User', related_name='assigned_projects', blank=True)
+    expenses = models.ManyToManyField('Expense', related_name='projects', blank=True)
 
     # Dates
     start_date = models.DateField()
@@ -579,22 +597,6 @@ class Income(models.Model):
 
 
 class Expense(models.Model):
-    CATEGORY_CHOICES = [
-        ('rent', 'Rent/Lease'),
-        ('utilities', 'Utilities'),
-        ('software', 'Software/Tools'),
-        ('hardware', 'Hardware/Equipment'),
-        ('travel', 'Travel'),
-        ('salaries', 'Salaries/Payroll'),
-        ('marketing', 'Marketing'),
-        ('office', 'Office Supplies'),
-        ('insurance', 'Insurance'),
-        ('taxes', 'Taxes'),
-        ('maintenance', 'Maintenance'),
-        ('professional', 'Professional Services'),
-        ('training', 'Training/Education'),
-        ('other', 'Other')
-    ]
 
     PAYMENT_METHOD_CHOICES = [
         ('cash', 'Cash'),

@@ -2,11 +2,10 @@ from decimal import Decimal
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.db.models import Count
-from django.db.models import Q
-from django.db.models import Sum, DecimalField
+from django.db.models import Count, Q, Sum, DecimalField
 from django.utils import timezone
 from django.utils.html import format_html
+from django.template.response import TemplateResponse
 from rangefilter.filters import DateRangeFilter
 
 from .models import User, Client, Project, Task, Income, Expense, Invoice
@@ -179,10 +178,10 @@ class UserAdmin(BaseUserAdmin):
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context)
 
-        try:
-            queryset = response.context_data['cl'].queryset
-        except (AttributeError, KeyError):
+        if not isinstance(response, TemplateResponse):
             return response
+
+        queryset = response.context_data.get('cl').queryset
 
         metrics = {
             'total_users': queryset.count(),
@@ -335,10 +334,10 @@ class ClientAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context)
 
-        try:
-            queryset = response.context_data['cl'].queryset
-        except (AttributeError, KeyError):
+        if not isinstance(response, TemplateResponse):
             return response
+
+        queryset = response.context_data['cl'].queryset
 
         # Add summary metrics
         metrics = {
@@ -515,10 +514,10 @@ class ProjectAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context)
 
-        try:
-            queryset = response.context_data['cl'].queryset
-        except (AttributeError, KeyError):
+        if not isinstance(response, TemplateResponse):
             return response
+
+        queryset = response.context_data['cl'].queryset
 
         metrics = {
             'total_projects': queryset.count(),
@@ -672,10 +671,10 @@ class IncomeAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context)
 
-        try:
-            queryset = response.context_data['cl'].queryset
-        except (AttributeError, KeyError):
+        if not isinstance(response, TemplateResponse):
             return response
+
+        queryset = response.context_data['cl'].queryset
 
         metrics = {
             'total_income': queryset.aggregate(
@@ -730,10 +729,10 @@ class ExpenseAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context)
 
-        try:
-            queryset = response.context_data['cl'].queryset
-        except (AttributeError, KeyError):
+        if not isinstance(response, TemplateResponse):
             return response
+
+        queryset = response.context_data['cl'].queryset
 
         metrics = {
             'total_expenses': queryset.aggregate(

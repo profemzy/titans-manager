@@ -1,8 +1,5 @@
-import base64
-import os
 from django.conf import settings
 from storages.backends.azure_storage import AzureStorage
-from azure.storage.blob._shared.authentication import SharedKeyCredentialPolicy
 
 
 class AzureReceiptStorage(AzureStorage):
