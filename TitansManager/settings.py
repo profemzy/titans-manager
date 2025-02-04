@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django.contrib.humanize",
     "drf_spectacular",
+    "django_filters",
     "core",
 ]
 
@@ -251,6 +252,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ),
 }
 
 SPECTACULAR_SETTINGS = {
@@ -302,3 +308,5 @@ AZURE_EXPIRATION_SECS = int(os.environ.get('AZURE_EXPIRATION_SECS', 86400))
 
 # Default file storage
 DEFAULT_FILE_STORAGE = 'custom_storage.AzureReceiptStorage'
+
+ENVIRONMENT = os.environ.get('DJANGO_ENV', 'production')

@@ -9,3 +9,4 @@ data:
   DJANGO_ALLOWED_HOSTS: "tms.ops.infotitans.ca,127.0.0.1,localhost"
   CSRF_TRUSTED_ORIGINS: "https://*.ops.infotitans.ca"
   DATABASE_PORT: "5432"
+  DJANGO_ENV: "production"
