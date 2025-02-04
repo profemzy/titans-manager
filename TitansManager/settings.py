@@ -14,7 +14,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-1ffaq*8vo0!kjz
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
-DEBUG = bool(os.environ.get("DEBUG", default=1))
+DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 
 ALLOWED_HOSTS = [
@@ -295,8 +295,8 @@ USE_TZ = True
 USE_L10N = True
 USE_I18N = True
 
-AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME')
-AZURE_ACCOUNT_KEY = os.environ.get('AZURE_ACCOUNT_KEY')
+AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME', 'DEFAULT')
+AZURE_ACCOUNT_KEY = os.environ.get('AZURE_ACCOUNT_KEY', 'DEFAULT')
 AZURE_RECEIPT_CONTAINER = os.environ.get('AZURE_RECEIPT_CONTAINER', 'tms-receipts')
 AZURE_EXPIRATION_SECS = int(os.environ.get('AZURE_EXPIRATION_SECS', 86400))
 

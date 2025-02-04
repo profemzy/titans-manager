@@ -7,7 +7,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db import migrations, models
 
-from core.models import CATEGORY_CHOICES
+from core.models.finance import CATEGORY_CHOICES
 
 
 class Migration(migrations.Migration):
