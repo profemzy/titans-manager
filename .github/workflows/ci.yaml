@@ -47,7 +47,7 @@ jobs:
         DATABASE_NAME: tmsdb
         DATABASE_USERNAME: dbuser
         DATABASE_PASSWORD: dbpassword
-        DATABASE_HOST: db
+        DATABASE_HOST: localhost
         DATABASE_PORT: 5432
       run: |
         pytest
