@@ -40,11 +40,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-
-    - name: Set up database
-      run: |
-        sudo apt-get install -y postgresql-client
-        PGPASSWORD=dbpassword psql -h localhost -U dbuser -d tmsdb -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+        
 
     - name: Run tests
       env:
