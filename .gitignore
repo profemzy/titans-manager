@@ -372,6 +372,7 @@ kubernetes/secret.yaml
 *.pylint.out
 *.pylint.err
 *.pylint.report
+.coverage
 *.pylint.cache
 *.pylint.d
 *.pylint.log

@@ -1,6 +1,5 @@
 import datetime
 from django.db import models
-
 from core.models import Client, Project
 from core.models.mixins.timestamp import TimestampMixin
 

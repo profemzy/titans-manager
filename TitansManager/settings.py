@@ -1,4 +1,5 @@
 import os
+import sys
 from socket import gethostbyname, gethostname
 from pathlib import Path
 
@@ -13,8 +14,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-1ffaq*8vo0!kjzo*u$u7p7(8i(h#5qo!2lyh9e=ohpx2nz4ro_")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = bool(os.environ.get("DEBUG", default=0))
+DEBUG = True
+# DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 
 ALLOWED_HOSTS = [
@@ -310,3 +311,11 @@ AZURE_EXPIRATION_SECS = int(os.environ.get('AZURE_EXPIRATION_SECS', 86400))
 DEFAULT_FILE_STORAGE = 'custom_storage.AzureReceiptStorage'
 
 ENVIRONMENT = os.environ.get('DJANGO_ENV', 'production')
+
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:'
+        }
+    }

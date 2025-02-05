@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 from typing import Dict, List, Any
-
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
@@ -16,13 +16,14 @@ class ProjectService(BaseService[Project]):
 
     @transaction.atomic
     def create_project(self,
-                      name: str,
-                      client_id: int,
-                      manager_id: int,
-                      start_date: date,
-                      end_date: date,
-                      budget: Decimal,
-                      **kwargs) -> Project:
+                       name: str,
+                       client_id: int,
+                       manager_id: int,
+                       start_date: date,
+                       end_date: date,
+                       budget: Decimal,
+                       code: str = None,
+                       **kwargs) -> Project:
         """Create a new project with validation and business logic."""
         if end_date < start_date:
             raise ValidationError("End date cannot be before start date")
@@ -30,8 +31,15 @@ class ProjectService(BaseService[Project]):
         if budget < 0:
             raise ValidationError("Budget cannot be negative")
 
+        # Generate project code if not provided
+        if not code:
+            year = timezone.now().year
+            count = Project.objects.filter(created_at__year=year).count()
+            code = f"P{year}{str(count + 1).zfill(3)}"
+
         project = self.create(
             name=name,
+            code=code,
             client_id=client_id,
             manager_id=manager_id,
             start_date=start_date,
@@ -89,4 +97,4 @@ class ProjectService(BaseService[Project]):
                 end_date__lte=date_range['end']
             )
 
-        return queryset
+        return list(queryset)

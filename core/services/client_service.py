@@ -1,8 +1,9 @@
 from decimal import Decimal
 from typing import Dict, Any
-from django.db.models import Sum, Count, Q
-from .base import BaseService
+from django.db.models import Sum
 from core.models import Client
+from .base import BaseService
+
 
 class ClientService(BaseService[Client]):
     def __init__(self):

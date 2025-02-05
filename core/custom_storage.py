@@ -1,5 +1,6 @@
 from django.conf import settings
 from storages.backends.azure_storage import AzureStorage
+from datetime import datetime, UTC  # Add UTC import
 
 
 class AzureReceiptStorage(AzureStorage):
@@ -33,14 +34,14 @@ class AzureReceiptStorage(AzureStorage):
         Returns a filename that's free on the target storage system.
         If the filename exists, it will append a timestamp.
         """
-        from datetime import datetime
         import os
 
         dir_name, file_name = os.path.split(name)
         file_root, file_ext = os.path.splitext(file_name)
 
         while self.exists(name):
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            # Using timezone-aware datetime
+            timestamp = datetime.now(UTC).strftime('%Y%m%d_%H%M%S')
             proposed_name = os.path.join(dir_name, f'{file_root}_{timestamp}{file_ext}')
 
             if max_length:

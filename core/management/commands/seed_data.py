@@ -1,7 +1,9 @@
-from django.core.management.base import BaseCommand
-from core.models import User, Client, Project, Task, Income, Expense, Invoice
 from decimal import Decimal
-from django.utils import timezone
+
+from django.core.management.base import BaseCommand
+
+from core.models import User, Client, Project, Task, Income, Expense, Invoice
+
 
 class Command(BaseCommand):
     help = 'Seeds the database with initial data'
