@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background Shield -->
+  <path d="M100 10 L180 50 L180 120 Q100 190 100 190 Q100 190 20 120 L20 50 Z" 
+        fill="#2563eb" 
+        stroke="#1e40af" 
+        stroke-width="4"/>
+  
+  <!-- IT Letters -->
+  <g fill="white">
+    <!-- I -->
+    <rect x="60" y="45" width="12" height="90" rx="2"/>
+    
+    <!-- T -->
+    <rect x="85" y="45" width="55" height="12" rx="2"/>
+    <rect x="106" y="45" width="12" height="90" rx="2"/>
+  </g>
+  
+  <!-- Circuit Lines -->
+  <g stroke="rgba(255,255,255,0.5)" stroke-width="2" fill="none">
+    <path d="M40 100 L55 100"/>
+    <path d="M145 100 L160 100"/>
+    <path d="M100 155 L100 170"/>
+    <circle cx="55" cy="100" r="3" fill="rgba(255,255,255,0.5)"/>
+    <circle cx="145" cy="100" r="3" fill="rgba(255,255,255,0.5)"/>
+    <circle cx="100" cy="155" r="3" fill="rgba(255,255,255,0.5)"/>
+  </g>
+  
+  <!-- Hexagonal Highlight -->
+  <path d="M95 30 L105 30 L110 38 L105 46 L95 46 L90 38 Z" 
+        fill="rgba(255,255,255,0.2)"/>
+</svg>

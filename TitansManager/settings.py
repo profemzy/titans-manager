@@ -54,93 +54,102 @@ INSTALLED_APPS = [
 ]
 
 JAZZMIN_SETTINGS = {
-    "site_title": "TitansManager Admin",
-    "site_header": "TitansManager",
-    "site_brand": "TitansManager",
-    "welcome_sign": "Welcome to the TitansManager Admin Portal",
-    "copyright": "TitansManager Ltd",
-    # Logo to use for your site, must be present in static files, used for brand on top left
-    # "site_logo": "books/img/logo.png",
+    # Branding
+    "site_title": "InfoTitans",
+    "site_header": "InfoTitans Portal",
+    "site_brand": "InfoTitans",
+    "welcome_sign": "Welcome to InfoTitans",
+    # "copyright": "© 2025 InfoTitans Ltd",
+    "site_logo": "img/infotitans-logo.svg",
+    "site_logo_classes": "elevation-2",
+
+    # Search and Navigation
     "search_model": ["core.User", "core.Client", "core.Project"],
     "user_avatar": None,
 
+
+    # Top Menu
     "topmenu_links": [
-        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"name": "Support", "url": "https://github.com/yourusername/TitansManager/issues", "new_window": True},
+        {"name": "Dashboard", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Support", "url": "https://github.com/profemzy/titans-manager/issues", "new_window": True},
         {"model": "core.User"},
     ],
 
-    # CSS classes that are applied to the logo above
-    "site_logo_classes": "img-circle",
+    # UI Settings
     "show_sidebar": True,
     "navigation_expanded": True,
-    "hide_apps": [],
-    "hide_models": [],
-     "icons": {
-        "auth": "fas fa-users-cog",
+    "sidebar_fixed": True,
+    "sidebar_collapse": False,
+    "related_modal_active": True,
+
+    # Visual Customization
+    "custom_css": None,
+    "custom_js": None,
+    "show_ui_builder": False,
+
+    # Icons (using consistent Font Awesome styling)
+    "icons": {
+        "auth": "fas fa-shield-alt",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
         "core.client": "fas fa-building",
         "core.project": "fas fa-project-diagram",
         "core.task": "fas fa-tasks",
-        "core.income": "fas fa-money-bill-wave",
+        "core.income": "fas fa-hand-holding-usd",
         "core.expense": "fas fa-file-invoice-dollar",
         "core.invoice": "fas fa-file-invoice",
     },
-    "default_icon_parents": "fas fa-chevron-circle-right",
-    "default_icon_children": "fas fa-circle",
-    "related_modal_active": False,
-    "custom_css": None,
-    "custom_js": None,
-    "show_ui_builder": True,
+    "default_icon_parents": "fas fa-folder",
+    "default_icon_children": "fas fa-file",
 
-    "sidebar_fixed": True,
-
-    # Whether to enable collapsing the sidebar
-    "sidebar_collapse": False,
-
-    # Whether to start the sidebar collapsed
-    "sidebar_collapse_pin": False,
-
-    # Whether to enable collapsing the menu
-    "collapse_navbar": False,
-
-    # Dark mode
+    # Dark mode settings
     "dark_mode_theme": None,
+
+    "site_logo": "img/infotitans-logo.svg",
+    "site_logo_classes": "elevation-3",
 }
 
 JAZZMIN_UI_TWEAKS = {
+    # Text Settings
     "navbar_small_text": False,
     "footer_small_text": False,
     "body_small_text": False,
     "brand_small_text": False,
-    "brand_colour": "navbar-info",
+
+    # Color Scheme (Light Mode)
+    "brand_colour": "navbar-light",
     "accent": "accent-primary",
-    "navbar": "navbar-white navbar-light",
-    "no_navbar_border": False,
-    "navbar_fixed": False,
+    "navbar": "navbar-light bg-white",
+    "sidebar": "sidebar-light-primary",
+
+    # Layout Settings
     "layout_boxed": False,
-    "footer_fixed": False,
-    "sidebar_fixed": False,
-    "sidebar": "sidebar-dark-info",
+    "navbar_fixed": True,
+    "footer_fixed": True,
+    "sidebar_fixed": True,
+
+    # Sidebar Navigation Style
     "sidebar_nav_small_text": False,
     "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": True,
     "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    "theme": "default",
-    "dark_mode_theme": None,
+    "sidebar_nav_flat_style": True,
+
+    # Theme and Borders
+    "theme": "cerulean",  # Clean, light theme
+    "no_navbar_border": False,
+
+    # Button Styling
     "button_classes": {
-        "primary": "btn-outline-primary",
+        "primary": "btn-primary",
         "secondary": "btn-outline-secondary",
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success"
+        "info": "btn-outline-info",
+        "warning": "btn-outline-warning",
+        "danger": "btn-outline-danger",
+        "success": "btn-outline-success"
     }
 }
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -229,7 +238,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = os.environ.get('STATIC_ROOT', os.path.join(BASE_DIR, 'staticfiles'))
 
 # Extra places for collectstatic to find static files
