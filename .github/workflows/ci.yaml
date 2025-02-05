@@ -12,6 +12,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17.2
+        env:
+          POSTGRES_DB: tmsdb
+          POSTGRES_USER: dbuser
+          POSTGRES_PASSWORD: dbpassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test_user -d test_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -26,6 +41,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Set up database
+      run: |
+        sudo apt-get install -y postgresql-client
+        psql -h localhost -U test_user -d test_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
     - name: Run tests
+      env:
+        DATABASE_NAME: tmsdb
+        DATABASE_USERNAME: dbuser
+        DATABASE_PASSWORD: dbpassword
+        DATABASE_HOST: db
+        DATABASE_PORT: 5432
       run: |
         pytest
