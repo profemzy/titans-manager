@@ -44,7 +44,7 @@ jobs:
     - name: Set up database
       run: |
         sudo apt-get install -y postgresql-client
-        psql -h localhost -U test_user -d test_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+        PGPASSWORD=dbpassword psql -h localhost -U dbuser -d tmsdb -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 
     - name: Run tests
       env:
