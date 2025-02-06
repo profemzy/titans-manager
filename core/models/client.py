@@ -29,16 +29,27 @@ class Client(TimestampMixin):
     country = models.CharField(max_length=100, blank=True, null=True)
 
     # Business Information
-    tax_number = models.CharField(max_length=50, blank=True, null=True, help_text="VAT/GST/Tax ID")
+    tax_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text="VAT/GST/Tax ID"
+    )
     industry = models.CharField(max_length=100, blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='active'
+    )
     notes = models.TextField(blank=True, null=True)
 
     # Billing Information
     billing_address = models.CharField(max_length=255, blank=True, null=True)
     billing_email = models.EmailField(blank=True, null=True)
-    payment_terms = models.IntegerField(default=30, help_text="Payment terms in days")
-
+    payment_terms = models.IntegerField(
+        default=30,
+        help_text="Payment terms in days"
+    )
 
     class Meta:
         ordering = ['name']
@@ -55,7 +66,7 @@ class Client(TimestampMixin):
         return self.name
 
     def get_full_address(self):
-        """Returns formatted full address"""
+        """Returns formatted full address."""
         parts = [
             self.address,
             self.city,
@@ -67,21 +78,22 @@ class Client(TimestampMixin):
 
     @property
     def total_projects(self):
-        """Returns total number of projects"""
+        """Returns total number of projects."""
         return self.projects.count()
 
     @property
     def total_revenue(self):
-        """Returns total revenue from client"""
+        """Returns total revenue from client."""
         return self.incomes.aggregate(total=models.Sum('amount'))['total'] or 0
 
     @property
     def outstanding_invoices(self):
-        """Returns queryset of unpaid invoices"""
+        """Returns queryset of unpaid invoices."""
         return self.invoices.filter(status='Unpaid')
 
     @property
     def total_outstanding(self):
-        """Returns total amount of unpaid invoices"""
+        """Returns total amount of unpaid invoices."""
         return self.outstanding_invoices.aggregate(
-            total=models.Sum('amount'))['total'] or 0
+            total=models.Sum('amount')
+        )['total'] or 0

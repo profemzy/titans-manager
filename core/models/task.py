@@ -35,13 +35,18 @@ class Task(TimestampMixin):
     # Basic Information
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
-    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
-    task_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='feature')
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES,
+                                default='medium')
+    task_type = models.CharField(max_length=20, choices=TYPE_CHOICES,
+                                 default='feature')
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES,
+                              default='pending')
 
     # Relations
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
-    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE,
+                                related_name='tasks')
+    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE,
+                                    related_name='tasks')
     reviewer = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -104,7 +109,10 @@ class Task(TimestampMixin):
 
     @property
     def is_overdue(self):
-        if self.status != 'completed' and self.due_date < timezone.now().date():
+        if (
+            self.status != 'completed'
+            and self.due_date < timezone.now().date()
+        ):
             return True
         return False
 
@@ -112,7 +120,11 @@ class Task(TimestampMixin):
     def time_spent(self):
         """Returns time spent in hours"""
         if self.started_at:
-            end_time = self.completed_at if self.completed_at else timezone.now()
+            end_time = (
+                self.completed_at
+                if self.completed_at
+                else timezone.now()
+            )
             duration = end_time - self.started_at
             return round(duration.total_seconds() / 3600, 2)
         return 0
@@ -126,14 +138,16 @@ class Task(TimestampMixin):
 
     @property
     def completion_percentage(self):
-        """Calculate task completion percentage based on actual vs estimated hours"""
+        """Calculate task completion percentage based on
+        actual vs estimated hours"""
         if self.estimated_hours == 0:
             return 100 if self.status == 'completed' else 0
         return min(100, (self.actual_hours / self.estimated_hours) * 100)
 
     def get_blocking_tasks(self):
         """Returns tasks that are blocking this task"""
-        return self.dependencies.filter(status__in=['pending', 'in_progress', 'blocked'])
+        return self.dependencies.filter(status__in=['pending', 'in_progress',
+                                                    'blocked'])
 
     def can_start(self):
         """Check if task can be started (no blocking dependencies)"""
