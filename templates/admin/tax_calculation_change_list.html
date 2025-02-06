@@ -1,0 +1,96 @@
+{% extends "admin/change_list.html" %}
+{% load humanize %}
+
+{% block content_title %}
+    <h1>Tax Calculations</h1>
+{% endblock %}
+
+{% block result_list %}
+    {# Tax Summary Section #}
+    <div class="module">
+        <h2>Tax Summary</h2>
+        <div class="results">
+            <table>
+                <tr>
+                    <th>Total Tax Payable</th>
+                    <td>${{ summary_metrics.total_tax_payable|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <th>Federal Tax Total</th>
+                    <td>${{ summary_metrics.federal_total|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <th>Provincial Tax Total</th>
+                    <td>${{ summary_metrics.provincial_total|floatformat:2 }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {# Current Year Calculation #}
+    {% if tax_calculation %}
+    <div class="module">
+        <h2>Current Year Tax Calculation</h2>
+        <div class="results">
+            <table>
+                <tr>
+                    <th>Total Income</th>
+                    <td>${{ tax_calculation.total_income|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <th>Total Expenses</th>
+                    <td>${{ tax_calculation.total_expenses|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <th>Taxable Income</th>
+                    <td>${{ tax_calculation.taxable_income|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <th>Federal Tax (Current)</th>
+                    <td>${{ tax_calculation.federal_tax|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <th>Provincial Tax (Current)</th>
+                    <td>${{ tax_calculation.provincial_tax|floatformat:2 }}</td>
+                </tr>
+                <tr>
+                    <th>Effective Tax Rate</th>
+                    <td>{{ tax_calculation.effective_tax_rate|floatformat:2 }}%</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Yearly Summary #}
+    <div class="module">
+        <h2>Yearly Summary</h2>
+        <div class="results">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Total Tax</th>
+                        <th>Federal</th>
+                        <th>Provincial</th>
+                        <th>Effective Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for year in summary_metrics.yearly_summary %}
+                    <tr>
+                        <td>{{ year.tax_year }}</td>
+                        <td>${{ year.total_tax|floatformat:2 }}</td>
+                        <td>${{ year.federal_tax|floatformat:2 }}</td>
+                        <td>${{ year.provincial_tax|floatformat:2 }}</td>
+                        <td>{{ year.effective_rate|floatformat:2 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# Original Change List #}
+    {{ block.super }}
+{% endblock %}

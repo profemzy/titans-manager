@@ -1,7 +1,5 @@
 from django.contrib import admin
 
-from core.models import Task
-
 # Customize Admin Header
 admin.site.site_header = "TitansManager Admin"
 admin.site.site_title = "TitansManager Admin Portal"
@@ -16,4 +14,5 @@ from .task import TaskAdmin
 from .finance.income import IncomeAdmin
 from .finance.expense import ExpenseAdmin
 from .finance.invoice import InvoiceAdmin
+from .finance.tax import TaxAdmin
 

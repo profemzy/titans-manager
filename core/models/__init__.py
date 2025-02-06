@@ -5,6 +5,7 @@ from .task import Task
 from .finance.income import Income
 from .finance.expense import Expense
 from .finance.invoice import Invoice
+from .finance.tax import TaxCalculation
 
 __all__ = [
     'User',
@@ -14,4 +15,5 @@ __all__ = [
     'Income',
     'Expense',
     'Invoice',
+    'TaxCalculation',
 ]

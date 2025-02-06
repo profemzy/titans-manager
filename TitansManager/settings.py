@@ -7,15 +7,11 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-1ffaq*8vo0!kjzo*u$u7p7(8i(h#5qo!2lyh9e=ohpx2nz4ro_")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# DEBUG = bool(os.environ.get("DEBUG", default=0))
+DEBUG = bool(os.environ.get("DEBUG", default=1))
 
 
 ALLOWED_HOSTS = [
@@ -34,7 +30,6 @@ if POD_IP:
 
 
 # Application definition
-
 INSTALLED_APPS = [
     "jazzmin",
     "django.contrib.admin",
@@ -98,6 +93,7 @@ JAZZMIN_SETTINGS = {
         "core.income": "fas fa-hand-holding-usd",
         "core.expense": "fas fa-file-invoice-dollar",
         "core.invoice": "fas fa-file-invoice",
+        "core.taxcalculation": "fas fa-calculator",
     },
     "default_icon_parents": "fas fa-folder",
     "default_icon_children": "fas fa-file",
@@ -150,6 +146,7 @@ JAZZMIN_UI_TWEAKS = {
         "success": "btn-outline-success"
     }
 }
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -234,10 +231,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = "/static/"
 STATIC_ROOT = os.environ.get('STATIC_ROOT', os.path.join(BASE_DIR, 'staticfiles'))
 
@@ -278,7 +271,6 @@ SPECTACULAR_SETTINGS = {
 
 # CSRF settings
 CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1').split(',')
-# CSRF_TRUSTED_ORIGINS = ["https://*.ops.infotitans.ca"]
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_USE_SESSIONS = True
 
