@@ -56,4 +56,11 @@
     </div>
 {% endblock %}
 
+{% block object-tools-items %}
+    <a href="{% url 'admin:expense-report' %}" class="btn btn-primary">
+        Generate Report
+    </a>
+    {{ block.super }}
+{% endblock %}
+
 {% block content %}{{ block.super }}{% endblock %}

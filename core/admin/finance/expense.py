@@ -44,3 +44,16 @@ class ExpenseAdmin(FinancialAdminMixin, admin.ModelAdmin):
                 .annotate(total=Sum('amount')) \
                 .order_by('date__year', 'date__month'),
         }
+
+    def get_report_context(self, queryset, start_date, end_date):
+        """Provide income-specific report context"""
+        context = super().get_report_context(queryset, start_date, end_date)
+        context.update({
+            'client_totals': queryset.values('client__name')
+            .annotate(total=Sum('amount'))
+            .order_by('-total'),
+            'project_totals': queryset.values('project__name')
+            .annotate(total=Sum('amount'))
+            .order_by('-total')
+        })
+        return context
