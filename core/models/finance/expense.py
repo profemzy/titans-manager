@@ -35,25 +35,31 @@ class Expense(TimestampMixin):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     amount = models.DecimalField(max_digits=18, decimal_places=2)
-    tax_amount = models.DecimalField(max_digits=18, decimal_places=2, default=0.00)
+    tax_amount = models.DecimalField(max_digits=18, decimal_places=2,
+                                     default=0.00)
 
     # Categorization
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
-    tax_status = models.CharField(max_length=20, choices=TAX_STATUS_CHOICES, default='taxable')
+    tax_status = models.CharField(max_length=20, choices=TAX_STATUS_CHOICES,
+                                  default='taxable')
 
     # Payment Details
-    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES)
+    payment_method = models.CharField(max_length=50,
+                                      choices=PAYMENT_METHOD_CHOICES)
     payment_reference = models.CharField(max_length=100, blank=True, null=True,
-                                         help_text="Reference number, cheque number, or transaction ID")
+                                         help_text="Reference number")
 
     # Dates
     date = models.DateField(help_text="Date of expense")
-    due_date = models.DateField(null=True, blank=True, help_text="Due date for payment if applicable")
+    due_date = models.DateField(null=True, blank=True,
+                                help_text="Due date for payment if applicable")
     paid_date = models.DateField(null=True, blank=True)
 
     # Recurring Information
     is_recurring = models.BooleanField(default=False)
-    recurring_frequency = models.CharField(max_length=20, choices=RECURRING_CHOICES, default='none')
+    recurring_frequency = models.CharField(max_length=20,
+                                           choices=RECURRING_CHOICES,
+                                           default='none')
     recurring_end_date = models.DateField(null=True, blank=True)
 
     # Documentation
@@ -68,7 +74,8 @@ class Expense(TimestampMixin):
         ('rejected', 'Rejected'),
         ('paid', 'Paid')
     ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES,
+                              default='pending')
     approved_by = models.ForeignKey(
         'User',
         on_delete=models.SET_NULL,
@@ -119,7 +126,8 @@ class Expense(TimestampMixin):
         """
         from django.utils.text import slugify
         date = instance.date
-        return f'receipts/{date.year}/{date.month:02d}/{slugify(instance.vendor or "unknown")}/{filename}'
+        return (f'receipts/{date.year}/{date.month:02d}/'
+                f'{slugify(instance.vendor or "unknown")}/{filename}')
 
     receipt = models.FileField(
         upload_to=receipt_upload_path,
