@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-1ffaq*8vo0!kjzo*u$u7p7(8i(h#5qo!2lyh9e=ohpx2nz4ro_")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure#")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -70,8 +70,16 @@ JAZZMIN_SETTINGS = {
 
     # Top Menu
     "topmenu_links": [
-        {"name": "Dashboard", "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"name": "Support", "url": "https://github.com/profemzy/titans-manager/issues", "new_window": True},
+        {
+            "name": "Dashboard",
+            "url": "admin:index",
+            "permissions": ["auth.view_user"]
+        },
+        {
+            "name": "Support",
+            "url": "https://github.com/profemzy/titans-manager/issues",
+            "new_window": True
+        },
         {"model": "core.User"},
     ],
 
@@ -106,7 +114,6 @@ JAZZMIN_SETTINGS = {
     "dark_mode_theme": None,
 
     "site_logo": "img/infotitans-logo.svg",
-    "site_logo_classes": "elevation-3",
 }
 
 JAZZMIN_UI_TWEAKS = {
@@ -134,7 +141,7 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_child_indent": True,
     "sidebar_nav_compact_style": True,
     "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": True,
+    "sidebar_nav_flat_style": False,
 
     # Theme and Borders
     "theme": "cerulean",  # Clean, light theme
@@ -171,8 +178,7 @@ ROOT_URLCONF = "TitansManager.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates']
-        ,
+        "DIRS": [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -239,7 +245,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.environ.get('STATIC_ROOT', os.path.join(BASE_DIR, 'staticfiles'))
+STATIC_ROOT = os.environ.get('STATIC_ROOT',
+                             os.path.join(BASE_DIR, 'staticfiles'))
 
 # Extra places for collectstatic to find static files
 STATICFILES_DIRS = [
@@ -277,8 +284,10 @@ SPECTACULAR_SETTINGS = {
 }
 
 # CSRF settings
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost,http://127.0.0.1').split(',')
-# CSRF_TRUSTED_ORIGINS = ["https://*.ops.infotitans.ca"]
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS', 'http://localhost, http://127.0.0.1'
+).split(',')
+
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_USE_SESSIONS = True
 
@@ -313,18 +322,11 @@ USE_I18N = True
 
 AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME', 'DEFAULT')
 AZURE_ACCOUNT_KEY = os.environ.get('AZURE_ACCOUNT_KEY', 'DEFAULT')
-AZURE_RECEIPT_CONTAINER = os.environ.get('AZURE_RECEIPT_CONTAINER', 'tms-receipts')
+AZURE_RECEIPT_CONTAINER = os.environ.get('AZURE_RECEIPT_CONTAINER',
+                                         'tms-receipts')
 AZURE_EXPIRATION_SECS = int(os.environ.get('AZURE_EXPIRATION_SECS', 86400))
 
 # Default file storage
 DEFAULT_FILE_STORAGE = 'custom_storage.AzureReceiptStorage'
 
 ENVIRONMENT = os.environ.get('DJANGO_ENV', 'production')
-
-if 'test' in sys.argv:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': ':memory:'
-        }
-    }

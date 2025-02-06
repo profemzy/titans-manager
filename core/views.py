@@ -59,7 +59,8 @@ class UserViewSet(BaseViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     service_class = UserService
-    search_fields = ['username', 'email', 'first_name', 'last_name', 'employee_id']
+    search_fields = ['username', 'email', 'first_name', 'last_name',
+                     'employee_id']
     ordering_fields = ['username', 'date_joined', 'last_login']
     filterset_fields = ['role', 'department', 'status']
 
@@ -261,7 +262,7 @@ class HealthCheckView(APIView):
         try:
             cache.set('health_check', 'ok', 1)
             cache_status = cache.get('health_check') == 'ok'
-        except:
+        except (ConnectionError, ValueError):
             cache_status = False
 
         # Add more comprehensive checks
