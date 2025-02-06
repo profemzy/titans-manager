@@ -7,11 +7,11 @@ from .finance.expense import Expense
 from .finance.invoice import Invoice
 
 __all__ = [
-    'User',
-    'Client',
-    'Project',
-    'Task',
-    'Income',
-    'Expense',
-    'Invoice',
+    "User",
+    "Client",
+    "Project",
+    "Task",
+    "Income",
+    "Expense",
+    "Invoice",
 ]

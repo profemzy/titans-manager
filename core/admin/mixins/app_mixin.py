@@ -12,11 +12,11 @@ class DisplayMixin:
             return f"${float(amount):,.2f}"
         return default
 
-    def format_date(self, date, format_string='%Y-%m-%d'):
+    def format_date(self, date, format_string="%Y-%m-%d"):
         """Format date with consistent styling."""
         if date:
             return date.strftime(format_string)
-        return '-'
+        return "-"
 
 
 class StatusDisplayMixin(DisplayMixin):
@@ -24,28 +24,26 @@ class StatusDisplayMixin(DisplayMixin):
 
     status_colors = {
         # Project/Task statuses
-        'planning': 'blue',
-        'in_progress': 'orange',
-        'on_hold': 'red',
-        'completed': 'green',
-        'cancelled': 'grey',
+        "planning": "blue",
+        "in_progress": "orange",
+        "on_hold": "red",
+        "completed": "green",
+        "cancelled": "grey",
         # User/Client statuses
-        'active': 'green',
-        'inactive': 'red',
-        'prospect': 'blue',
-        'former': 'grey',
+        "active": "green",
+        "inactive": "red",
+        "prospect": "blue",
+        "former": "grey",
     }
 
     def display_status(self, obj):
         """Display status with appropriate color coding."""
-        color = self.status_colors.get(obj.status, 'black')
+        color = self.status_colors.get(obj.status, "black")
         return format_html(
-            '<span style="color: {};">{}</span>',
-            color,
-            obj.get_status_display()
+            '<span style="color: {};">{}</span>', color, obj.get_status_display()
         )
 
-    display_status.short_description = 'Status'
+    display_status.short_description = "Status"
 
 
 class MetricsMixin:
@@ -54,7 +52,7 @@ class MetricsMixin:
     def get_metrics(self, queryset):
         """Override this method to define custom metrics for different models."""
         return {
-            'total_items': queryset.count(),
+            "total_items": queryset.count(),
         }
 
     def changelist_view(self, request, extra_context=None):
@@ -63,8 +61,8 @@ class MetricsMixin:
         if not isinstance(response, TemplateResponse):
             return response
 
-        queryset = response.context_data['cl'].queryset
-        response.context_data['summary_metrics'] = self.get_metrics(queryset)
+        queryset = response.context_data["cl"].queryset
+        response.context_data["summary_metrics"] = self.get_metrics(queryset)
         return response
 
 
@@ -73,36 +71,30 @@ class TimestampDisplayMixin(DisplayMixin):
 
     def display_created_at(self, obj):
         return format_html(
-            '<span>{}</span>',
-            self.format_date(obj.created_at, '%Y-%m-%d %H:%M:%S')
+            "<span>{}</span>", self.format_date(obj.created_at, "%Y-%m-%d %H:%M:%S")
         )
 
-    display_created_at.short_description = 'Created At'
+    display_created_at.short_description = "Created At"
 
     def display_updated_at(self, obj):
         return format_html(
-            '<span>{}</span>',
-            self.format_date(obj.updated_at, '%Y-%m-%d %H:%M:%S')
+            "<span>{}</span>", self.format_date(obj.updated_at, "%Y-%m-%d %H:%M:%S")
         )
 
-    display_updated_at.short_description = 'Updated At'
+    display_updated_at.short_description = "Updated At"
 
 
 class WorkloadDisplayMixin:
     """Mixin for displaying user workload information."""
 
     def display_workload(self, obj):
-        active_tasks = obj.tasks.exclude(status='completed').count()
+        active_tasks = obj.tasks.exclude(status="completed").count()
         total_tasks = obj.tasks.count()
         if total_tasks:
-            return format_html(
-                '{} active / {} total',
-                active_tasks,
-                total_tasks
-            )
-        return '0 tasks'
+            return format_html("{} active / {} total", active_tasks, total_tasks)
+        return "0 tasks"
 
-    display_workload.short_description = 'Workload'
+    display_workload.short_description = "Workload"
 
 
 class ReportsToDisplayMixin:
@@ -113,11 +105,11 @@ class ReportsToDisplayMixin:
             return format_html(
                 '<a href="{}/">{}</a>',
                 obj.reports_to.id,
-                obj.reports_to.get_full_name() or obj.reports_to.username
+                obj.reports_to.get_full_name() or obj.reports_to.username,
             )
-        return '-'
+        return "-"
 
-    display_reports_to.short_description = 'Reports To'
+    display_reports_to.short_description = "Reports To"
 
 
 class FinancialMetricsMixin(MetricsMixin):
@@ -125,26 +117,31 @@ class FinancialMetricsMixin(MetricsMixin):
 
     def get_metrics(self, queryset):
         metrics = super().get_metrics(queryset)
-        metrics.update({
-            'total_revenue': queryset.aggregate(
-                total=Sum('incomes__amount'))['total'] or 0,
-            'total_outstanding': queryset.aggregate(
-                total=Sum('invoices__amount',
-                          filter=Q(invoices__status='Unpaid')))['total'] or 0
-        })
+        metrics.update(
+            {
+                "total_revenue": queryset.aggregate(total=Sum("incomes__amount"))[
+                    "total"
+                ]
+                or 0,
+                "total_outstanding": queryset.aggregate(
+                    total=Sum("invoices__amount", filter=Q(invoices__status="Unpaid"))
+                )["total"]
+                or 0,
+            }
+        )
         return metrics
 
     def display_revenue(self, obj):
         return self.format_currency(obj.total_revenue)
 
-    display_revenue.short_description = 'Total Revenue'
+    display_revenue.short_description = "Total Revenue"
 
     def display_outstanding(self, obj):
         if obj.total_outstanding > 0:
             return format_html(
                 '<span style="color: red;">{}</span>',
-                self.format_currency(obj.total_outstanding)
+                self.format_currency(obj.total_outstanding),
             )
         return self.format_currency(0)
 
-    display_outstanding.short_description = 'Outstanding'
+    display_outstanding.short_description = "Outstanding"

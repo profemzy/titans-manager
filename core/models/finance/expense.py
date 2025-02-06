@@ -8,27 +8,24 @@ from ...custom_storage import AzureReceiptStorage
 class Expense(TimestampMixin):
 
     PAYMENT_METHOD_CHOICES = [
-        ('cash', 'Cash'),
-        ('credit_card', 'Credit Card'),
-        ('debit_card', 'Debit Card'),
-        ('bank_transfer', 'Bank Transfer'),
-        ('cheque', 'Cheque'),
-        ('paypal', 'PayPal'),
-        ('other', 'Other')
+        ("cash", "Cash"),
+        ("credit_card", "Credit Card"),
+        ("debit_card", "Debit Card"),
+        ("bank_transfer", "Bank Transfer"),
+        ("cheque", "Cheque"),
+        ("paypal", "PayPal"),
+        ("other", "Other"),
     ]
 
-    TAX_STATUS_CHOICES = [
-        ('taxable', 'Taxable'),
-        ('non_taxable', 'Non-Taxable')
-    ]
+    TAX_STATUS_CHOICES = [("taxable", "Taxable"), ("non_taxable", "Non-Taxable")]
 
     RECURRING_CHOICES = [
-        ('none', 'Not Recurring'),
-        ('daily', 'Daily'),
-        ('weekly', 'Weekly'),
-        ('monthly', 'Monthly'),
-        ('quarterly', 'Quarterly'),
-        ('yearly', 'Yearly')
+        ("none", "Not Recurring"),
+        ("daily", "Daily"),
+        ("weekly", "Weekly"),
+        ("monthly", "Monthly"),
+        ("quarterly", "Quarterly"),
+        ("yearly", "Yearly"),
     ]
 
     # Basic Information
@@ -39,21 +36,31 @@ class Expense(TimestampMixin):
 
     # Categorization
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
-    tax_status = models.CharField(max_length=20, choices=TAX_STATUS_CHOICES, default='taxable')
+    tax_status = models.CharField(
+        max_length=20, choices=TAX_STATUS_CHOICES, default="taxable"
+    )
 
     # Payment Details
     payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES)
-    payment_reference = models.CharField(max_length=100, blank=True, null=True,
-                                         help_text="Reference number, cheque number, or transaction ID")
+    payment_reference = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Reference number, cheque number, or transaction ID",
+    )
 
     # Dates
     date = models.DateField(help_text="Date of expense")
-    due_date = models.DateField(null=True, blank=True, help_text="Due date for payment if applicable")
+    due_date = models.DateField(
+        null=True, blank=True, help_text="Due date for payment if applicable"
+    )
     paid_date = models.DateField(null=True, blank=True)
 
     # Recurring Information
     is_recurring = models.BooleanField(default=False)
-    recurring_frequency = models.CharField(max_length=20, choices=RECURRING_CHOICES, default='none')
+    recurring_frequency = models.CharField(
+        max_length=20, choices=RECURRING_CHOICES, default="none"
+    )
     recurring_end_date = models.DateField(null=True, blank=True)
 
     # Documentation
@@ -63,35 +70,33 @@ class Expense(TimestampMixin):
 
     # Approval and Status
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-        ('paid', 'Paid')
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+        ("paid", "Paid"),
     ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     approved_by = models.ForeignKey(
-        'User',
+        "User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='approved_expenses'
+        related_name="approved_expenses",
     )
     submitted_by = models.ForeignKey(
-        'User',
-        on_delete=models.CASCADE,
-        related_name='submitted_expenses'
+        "User", on_delete=models.CASCADE, related_name="submitted_expenses"
     )
 
     # Metadata
     notes = models.TextField(blank=True, null=True)
 
     class Meta:
-        ordering = ['-date', '-created_at']
+        ordering = ["-date", "-created_at"]
         indexes = [
-            models.Index(fields=['date']),
-            models.Index(fields=['category']),
-            models.Index(fields=['status']),
-            models.Index(fields=['is_recurring']),
+            models.Index(fields=["date"]),
+            models.Index(fields=["category"]),
+            models.Index(fields=["status"]),
+            models.Index(fields=["is_recurring"]),
         ]
 
     def __str__(self):
@@ -118,6 +123,7 @@ class Expense(TimestampMixin):
         Format: receipts/YYYY/MM/client_name/filename
         """
         from django.utils.text import slugify
+
         date = instance.date
         return f'receipts/{date.year}/{date.month:02d}/{slugify(instance.vendor or "unknown")}/{filename}'
 
@@ -125,5 +131,5 @@ class Expense(TimestampMixin):
         upload_to=receipt_upload_path,
         null=True,
         blank=True,
-        storage=AzureReceiptStorage()
+        storage=AzureReceiptStorage(),
     )

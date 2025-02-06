@@ -23,7 +23,7 @@ class ProjectServiceTest(TestCase):
             manager_id=self.manager.id,
             start_date=self.start_date,
             end_date=self.end_date,
-            budget=Decimal('1000.00')
+            budget=Decimal("1000.00"),
         )
 
         self.assertIsInstance(project, Project)
@@ -31,7 +31,7 @@ class ProjectServiceTest(TestCase):
         self.assertEqual(project.client_id, self.client.id)
         self.assertEqual(project.manager_id, self.manager.id)
         self.assertIsNotNone(project.code)  # Verify code was generated
-        self.assertTrue(project.code.startswith('P'))
+        self.assertTrue(project.code.startswith("P"))
 
     def test_create_project_invalid_dates(self):
         with self.assertRaises(ValidationError):
@@ -41,7 +41,7 @@ class ProjectServiceTest(TestCase):
                 manager_id=self.manager.id,
                 start_date=self.end_date,  # End date before start date
                 end_date=self.start_date,
-                budget=Decimal('1000.00')
+                budget=Decimal("1000.00"),
             )
 
     def test_create_project_negative_budget(self):
@@ -52,7 +52,7 @@ class ProjectServiceTest(TestCase):
                 manager_id=self.manager.id,
                 start_date=self.start_date,
                 end_date=self.end_date,
-                budget=Decimal('-1000.00')
+                budget=Decimal("-1000.00"),
             )
 
     def test_assign_team_members(self):
@@ -61,7 +61,7 @@ class ProjectServiceTest(TestCase):
             manager=self.manager,
             start_date=self.start_date,
             end_date=self.end_date,
-            budget=Decimal('1000.00')
+            budget=Decimal("1000.00"),
         )
 
         team_members = [UserFactory() for _ in range(3)]
@@ -71,8 +71,8 @@ class ProjectServiceTest(TestCase):
         updated_project = self.service.assign_team_members(project, member_ids)
         self.assertEqual(updated_project.team_members.count(), 3)
         self.assertEqual(
-            set(updated_project.team_members.values_list('id', flat=True)),
-            set(member_ids)
+            set(updated_project.team_members.values_list("id", flat=True)),
+            set(member_ids),
         )
 
     def test_get_project_metrics(self):
@@ -81,11 +81,11 @@ class ProjectServiceTest(TestCase):
             manager=self.manager,
             start_date=self.start_date,
             end_date=self.end_date,
-            budget=Decimal('1000.00')
+            budget=Decimal("1000.00"),
         )
 
         # Using the instance method
         metrics = self.service.get_project_metrics(project)
-        self.assertIn('completion_percentage', metrics)
-        self.assertIn('budget_utilized', metrics)
-        self.assertIn('total_tasks', metrics)
+        self.assertIn("completion_percentage", metrics)
+        self.assertIn("budget_utilized", metrics)
+        self.assertIn("total_tasks", metrics)

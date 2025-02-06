@@ -2,7 +2,8 @@ from typing import TypeVar, Generic, Type, Optional, List
 
 from django.db import transaction
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class BaseService(Generic[T]):
     def __init__(self, model_class: Type[T]):

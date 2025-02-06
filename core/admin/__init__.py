@@ -16,4 +16,3 @@ from .task import TaskAdmin
 from .finance.income import IncomeAdmin
 from .finance.expense import ExpenseAdmin
 from .finance.invoice import InvoiceAdmin
-

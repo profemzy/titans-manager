@@ -16,18 +16,15 @@ class ClientService(BaseService[Client]):
         projects = client.projects.all()
 
         return {
-            'total_revenue': incomes.aggregate(
-                total=Sum('amount'))['total'] or Decimal('0'),
-            'outstanding_amount': invoices.filter(
-                status='sent'
-            ).aggregate(total=Sum('amount'))['total'] or Decimal('0'),
-            'projects_count': projects.count(),
-            'active_projects': projects.filter(
-                status='in_progress'
-            ).count(),
-            'total_completed_projects': projects.filter(
-                status='completed'
-            ).count(),
+            "total_revenue": incomes.aggregate(total=Sum("amount"))["total"]
+            or Decimal("0"),
+            "outstanding_amount": invoices.filter(status="sent").aggregate(
+                total=Sum("amount")
+            )["total"]
+            or Decimal("0"),
+            "projects_count": projects.count(),
+            "active_projects": projects.filter(status="in_progress").count(),
+            "total_completed_projects": projects.filter(status="completed").count(),
         }
 
     def update_status(self, client: Client, new_status: str) -> Client:

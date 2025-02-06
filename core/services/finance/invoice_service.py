@@ -13,12 +13,9 @@ class InvoiceService(BaseService[Invoice]):
         super().__init__(Invoice)
 
     @transaction.atomic
-    def create_invoice(self,
-                      client_id: int,
-                      project_id: int,
-                      amount: Decimal,
-                      due_date: date,
-                      **kwargs) -> Invoice:
+    def create_invoice(
+        self, client_id: int, project_id: int, amount: Decimal, due_date: date, **kwargs
+    ) -> Invoice:
         """Create a new invoice"""
         if amount <= 0:
             raise ValidationError("Amount must be positive")
@@ -40,14 +37,11 @@ class InvoiceService(BaseService[Invoice]):
     @transaction.atomic
     def mark_as_paid(self, invoice: Invoice, user: User) -> Invoice:
         """Mark invoice as paid"""
-        if invoice.status == 'paid':
+        if invoice.status == "paid":
             raise ValidationError("Invoice is already paid")
 
-        return self.update(invoice, status='paid')
+        return self.update(invoice, status="paid")
 
     def get_overdue_invoices(self) -> list:
         """Get all overdue invoices"""
-        return self.model_class.objects.filter(
-            status='sent',
-            due_date__lt=date.today()
-        )
+        return self.model_class.objects.filter(status="sent", due_date__lt=date.today())

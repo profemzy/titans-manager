@@ -13,25 +13,25 @@ class UserService(BaseService[User]):
     def get_user_workload(self, user: User) -> Dict[str, Any]:
         """Get user's current workload metrics"""
         active_tasks = Task.objects.filter(
-            assigned_to=user,
-            status__in=['pending', 'in_progress']
+            assigned_to=user, status__in=["pending", "in_progress"]
         )
 
         return {
-            'active_tasks_count': active_tasks.count(),
-            'high_priority_tasks': active_tasks.filter(priority='high').count(),
-            'overdue_tasks': active_tasks.filter(
+            "active_tasks_count": active_tasks.count(),
+            "high_priority_tasks": active_tasks.filter(priority="high").count(),
+            "overdue_tasks": active_tasks.filter(
                 due_date__lt=datetime.now().date()
             ).count(),
-            'projects_count': user.assigned_projects.count(),
-            'total_estimated_hours': active_tasks.aggregate(
-                total=models.Sum('estimated_hours')
-            )['total'] or 0
+            "projects_count": user.assigned_projects.count(),
+            "total_estimated_hours": active_tasks.aggregate(
+                total=models.Sum("estimated_hours")
+            )["total"]
+            or 0,
         }
 
     def update_user_skills(self, user: User, skills: list) -> User:
         """Update user's skills"""
-        user.skills = ','.join(skills)
+        user.skills = ",".join(skills)
         user.save()
         return user
 
