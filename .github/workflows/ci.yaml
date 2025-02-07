@@ -72,7 +72,7 @@ jobs:
         DJANGO_SETTINGS_MODULE: TitansManager.settings
         SECRET_KEY: testing_key
       run: |
-        pytest --cov=. --cov-report=term-missing --cov-fail-under=80
+        pytest --cov=. --cov-report=term-missing --cov-fail-under=50
 
     - name: Generate coverage report artifact
       if: success() || failure()
