@@ -8,6 +8,7 @@ from .finance.income import IncomeAdmin
 from .finance.invoice import InvoiceAdmin
 from .project import ProjectAdmin
 from .task import TaskAdmin
+
 # Import admin classes
 from .user import UserAdmin
 

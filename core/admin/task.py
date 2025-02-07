@@ -4,8 +4,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 from rangefilter.filters import DateRangeFilter
 
-from core.admin.mixins import (MetricsMixin, StatusDisplayMixin,
-                               TimestampDisplayMixin)
+from core.admin.mixins import MetricsMixin, StatusDisplayMixin, TimestampDisplayMixin
 from core.models import Task
 
 
