@@ -1,177 +1,238 @@
-# TitansManager App Development Plan
+# Titans Manager
 
-## Project Overview
-The TitansManager app is designed to help IT consulting companies manage income, expenses, clients, and projects efficiently. The app will provide a centralized platform for financial tracking, client management, project management, and reporting.
+A comprehensive business management system built with Django, featuring project management, client management, task tracking, and financial operations.
 
----
+## Features
 
-## Technology Stack
-- **Frontend**: React.js (with Material-UI for styling).
-- **Backend**: Django (Python-based framework).
-- **Database**: Azure Postgres SQL Database (structured data) and Azure Cosmos DB (unstructured data).
-- **Authentication**: Django's built-in authentication with JWT (JSON Web Tokens).
-- **Hosting**: Azure App Service (backend), Azure Static Web Apps (frontend), Azure Blob Storage (file storage).
-- **CI/CD**: Azure DevOps.
+- **Client Management**: Track and manage client information and relationships
+- **Project Management**: Create and manage projects with associated tasks
+- **Task Management**: Organize and track tasks with custom workflows
+- **Financial Management**:
+  - Expense tracking
+  - Income management
+  - Invoice generation
+  - Financial reporting
+- **User Management**: Role-based access control and user authentication
+- **Admin Interface**: Customized Django admin for efficient data management
 
----
+## Tech Stack
 
-## Development Phases
+- **Backend**: Django 5.1.5
+- **Database**: PostgreSQL
+- **Container**: Docker
+- **Orchestration**: Kubernetes
+- **API Documentation**: drf-spectacular
+- **Admin Interface**: django-jazzmin
+- **Storage**: django-storages with Azure Blob Storage
+- **Authentication**: djangorestframework-simplejwt
+- **Testing**: pytest, factory_boy
+- **Code Quality**: black, flake8
+- **Import/Export**: django-import-export
+- **File Handling**: Pillow, reportlab
+- **Development Tools**: Custom management commands for data seeding
 
-### Phase 1: Project Setup and Planning
-#### Tasks:
-1. Gather and document requirements.
-2. Choose the technology stack.
-3. Set up version control (GitHub/GitLab).
-4. Set up the development environment (Python, Node.js, VS Code).
-5. Create a project roadmap with sprints and deliverables.
+### Key Dependencies
 
-#### Deliverables:
-- Requirements document.
-- Technology stack finalized.
-- GitHub repository created.
-- Development environment ready.
+```txt
+Django==5.1.5
+djangorestframework==3.15.2
+psycopg2-binary==2.9.10
+django-jazzmin==3.0.1
+django-storages==1.14.4
+azure-storage-blob==12.24.1
+drf-spectacular==0.28.0
+django-filter==24.3
+django-import-export==4.3.4
+django-admin-rangefilter==0.13.2
+gunicorn==23.0.0
+pytest==8.3.4
+factory_boy==3.3.3
+black==25.1.0
+flake8==7.1.1
+Pillow==11.1.0
+reportlab==4.3.0
+whitenoise==6.8.2
+```
 
----
+Full dependencies are available in `requirements.txt`.
 
-### Phase 2: Database Design
-#### Tasks:
-1. Design the database schema for:
-   - Users, Clients, Projects, Tasks, Income, Expenses, Invoices.
-2. Set up Azure SQL Database.
-3. Seed initial data for testing.
+## Project Structure
 
-#### Deliverables:
-- Database schema design document.
-- Azure SQL Database instance created.
-- Sample data added.
+```
+core/
+├── admin/          # Django admin customizations
+├── models/         # Database models
+├── services/       # Business logic layer
+├── views/          # API endpoints
+├── tests/          # Test suite
+└── management/     # Custom management commands
+```
 
----
+## Setup
 
-### Phase 3: Backend Development
-#### Tasks:
-1. Set up Django backend.
-   - Install Django and required packages (`djangorestframework`, `django-cors-headers`, `python-dotenv`, `django-rest-framework-simplejwt`).
-2. Create Django models for:
-   - Users, Clients, Projects, Tasks, Income, Expenses, Invoices.
-3. Create API endpoints using Django REST Framework (DRF):
-   - Authentication, Clients, Projects, Income, Expenses, Invoices.
-4. Implement JWT-based authentication using `django-rest-framework-simplejwt`.
-5. Write unit tests using Django's testing framework.
-6. Set up Azure Blob Storage for file uploads.
+1. **Clone the repository**
 
-#### Deliverables:
-- Django backend with models and API endpoints.
-- Authentication system working.
-- Unit tests written and passed.
-- Azure Blob Storage configured.
+```bash
+git clone <repository-url>
+cd TitansManager
+```
 
----
+2. **Set up a virtual environment**
 
-### Phase 4: Frontend Development
-#### Tasks:
-1. Set up React.js frontend.
-2. Create pages for:
-   - Dashboard, Clients, Projects, Income/Expenses, Invoices, Reports.
-3. Integrate frontend with backend APIs using `axios`.
-4. Implement authentication (login/registration).
-5. Add charts and graphs using `Chart.js` or `Recharts`.
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-#### Deliverables:
-- Frontend pages developed.
-- Integration with backend APIs.
-- Authentication system working.
-- Visualizations added.
+3. **Install dependencies**
 
----
+```bash
+pip install -r requirements.txt
+```
 
-### Phase 5: Testing
-#### Tasks:
-1. Perform unit testing for backend APIs using Django's testing framework.
-2. Test React components using `React Testing Library`.
-3. Conduct integration testing (frontend + backend).
-4. Perform User Acceptance Testing (UAT) with stakeholders.
-5. Fix bugs and optimize performance.
+3. **Set up environment variables**
 
-#### Deliverables:
-- Unit and integration tests passed.
-- UAT feedback addressed.
-- Bug-free application.
+Create a `.env` file in the root directory with necessary configurations.
 
----
+4. **Run migrations**
 
-### Phase 6: Deployment
-#### Tasks:
-1. Set up Azure infrastructure:
-   - Azure App Service (backend).
-   - Azure Static Web Apps (frontend).
-   - Azure SQL Database and Azure Blob Storage.
-2. Deploy Django backend to Azure App Service.
-3. Deploy React frontend to Azure Static Web Apps.
-4. Configure custom domain and SSL.
-5. Set up Azure Monitor for performance tracking.
+```bash
+python manage.py migrate
+```
 
-#### Deliverables:
-- Backend and frontend deployed to Azure.
-- Custom domain and SSL configured.
-- Monitoring system in place.
+5. **Start the development server**
 
----
+```bash
+python manage.py runserver
+```
 
-### Phase 7: Training and Support
-#### Tasks:
-1. Train company staff on how to use the app.
-2. Provide user manuals and video tutorials.
-3. Set up a support channel (email/chat).
-4. Regularly update the app with new features and bug fixes.
+## Docker Deployment
 
-#### Deliverables:
-- Training sessions conducted.
-- User documentation provided.
-- Support channel established.
+1. **Build the image**
 
----
+```bash
+docker build -t titans-manager .
+```
 
-## Timeline
+2. **Run with docker-compose**
 
-| Phase               | Duration   |
-|---------------------|------------|
-| Project Setup       | 1 week     |
-| Database Design     | 1 week     |
-| Backend Development | 4 weeks    |
-| Frontend Development| 4 weeks    |
-| Testing             | 2 weeks    |
-| Deployment          | 1 week     |
-| Training & Support  | Ongoing    |
+```bash
+docker-compose up
+```
 
----
+## Kubernetes Deployment
 
-## Team Roles
+Kubernetes configuration files are available in the `kubernetes/` directory:
 
-1. **Project Manager**: Oversees the project and ensures timely delivery.
-2. **Backend Developer**: Implements APIs and database logic using Django.
-3. **Frontend Developer**: Builds the user interface using React.js.
-4. **QA Engineer**: Tests the app for bugs and issues.
-5. **DevOps Engineer**: Manages deployment and infrastructure on Azure.
+- `deployment.yaml`: Main application deployment
+- `service.yaml`: Service configuration
+- `ingress.yaml`: Ingress rules
+- `configmap.yaml`: Configuration values
+- `hpa.yaml`: Horizontal Pod Autoscaling
+- `pvc.yaml`: Persistent Volume Claims
+- `pgadmin.yaml`: PostgreSQL admin interface
 
----
+Apply the configurations:
 
-## Azure Services Used
+```bash
+kubectl apply -f kubernetes/
+```
 
-1. **Azure App Service**: Host the Django backend.
-2. **Azure Postgres Database**: Store structured data (clients, projects, income, expenses).
-3. **Azure Cosmos DB**: Store unstructured data (e.g., logs).
-4. **Azure Blob Storage**: Store files (e.g., receipts, invoices).
-5. **Azure Static Web Apps**: Host the React frontend.
-6. **Azure Monitor**: Monitor app performance and logs.
-7. **Azure DevOps**: Set up CI/CD pipelines for automated deployment.
+## Project Organization
 
----
+- `core/`: Main application code
+  - `models/`: Database models organized by domain
+  - `services/`: Business logic implementation
+  - `views/`: API endpoints and view logic
+  - `admin/`: Admin interface customizations
+  - `migrations/`: Database migrations
+  - `tests/`: Test suite and factories
 
-## Future Enhancements
-1. AI-powered insights (e.g., predict project overruns, suggest cost-saving measures).
-2. Mobile app for on-the-go access.
-3. Integration with CRM tools (e.g., Salesforce, HubSpot).
+- `templates/`: HTML templates
+  - `admin/`: Custom admin templates
+  - `base.html`: Base template
+  - `landing_page.html`: Main landing page
 
----
+- `static/`: Static files (images, CSS, JS)
 
-This document outlines the complete development plan for the TitansManager app. Let me know if you need further customization or additional details!
+## API Structure
+
+The API is organized by domains:
+- `/api/auth/`: Authentication endpoints
+- `/api/clients/`: Client management
+- `/api/projects/`: Project operations
+- `/api/tasks/`: Task management
+- `/api/finance/`: Financial operations
+  - `/expenses/`: Expense tracking
+  - `/income/`: Income management
+  - `/invoices/`: Invoice handling
+
+## Testing
+
+Run the test suite:
+
+```bash
+pytest
+```
+
+## Code Style and Linting
+
+The project uses flake8 for code linting with the following configuration:
+
+```ini
+[flake8]
+max-line-length = 106
+extend-ignore = E203, W503, E402
+exclude = 
+    .git,
+    __pycache__,
+    build,
+    dist,
+    *.pyc,
+    *.egg-info,
+    .eggs,
+    migrations,
+    .env,
+    .venv,
+    env,
+    venv,
+    ENV,
+    staticfiles,
+    media
+per-file-ignores =
+    */__init__.py: F401
+max-complexity = 10
+statistics = True
+count = True
+```
+
+To run the linter:
+
+```bash
+flake8 .
+```
+
+### Code Formatting
+
+The project uses `black` for code formatting. To format your code:
+
+```bash
+black .
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Ensure your code follows the style guide (run black and flake8)
+4. Commit your changes
+5. Push to the branch
+6. Create a Pull Request
+
+## License
+
+[License Information]
+
+## Support
+
+[Support Information]
