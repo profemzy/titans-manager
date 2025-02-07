@@ -1,71 +1,80 @@
-services:
-  postgres:
-    image: postgres:17.2
-    env:
-      POSTGRES_DB: tmsdb
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: dbpassword
-    ports:
-      - 5432:5432
-    options: >-
-      --health-cmd="pg_isready -U dbuser -d tmsdb"
-      --health-interval=10s
-      --health-timeout=5s
-      --health-retries=5
+name: Continuous Integration
 
-steps:
-- uses: actions/checkout@v4
-  with:
-    fetch-depth: 0
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly Sunday runs for security updates
 
-- name: Set up Python ${{ matrix.python-version }}
-  uses: actions/setup-python@v5
-  with:
-    python-version: ${{ matrix.python-version }}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
 
-- name: Cache pip dependencies
-  uses: actions/cache@v4
-  with:
-    path: ~/.cache/pip
-    key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
-    restore-keys: |
-      ${{ runner.os }}-pip-${{ matrix.python-version }}-
-      ${{ runner.os }}-pip-
+    services:
+      postgres:
+        image: postgres:17.2
+        env:
+          POSTGRES_DB: tmsdb
+          POSTGRES_USER: dbuser
+          POSTGRES_PASSWORD: dbpassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U dbuser -d tmsdb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
-- name: Install dependencies
-  run: |
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
-    pip install safety
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-- name: Check formatting with Black
-  run: black . --check
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
 
-- name: Lint with flake8
-  run: |
-    flake8 . --count --show-source --statistics
-    
-- name: Run tests with coverage
-  env:
-    DATABASE_NAME: tmsdb
-    DATABASE_USERNAME: dbuser
-    DATABASE_PASSWORD: dbpassword
-    DATABASE_HOST: localhost
-    DATABASE_PORT: 5432
-    DJANGO_SETTINGS_MODULE: TitansManager.settings
-    SECRET_KEY: testing_key
-  run: |
-    pytest --cov=. --cov-report=term-missing --cov-fail-under=80
-    
-- name: Generate coverage report artifact
-  if: success() || failure()
-  run: |
-    pytest --cov=. --cov-report=html
-    
-- name: Upload coverage report
-  if: success() || failure()
-  uses: actions/upload-artifact@v4
-  with:
-    name: coverage-report-${{ matrix.python-version }}
-    path: htmlcov/
-    retention-days: 14
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install safety
+
+    - name: Check formatting with Black
+      run: black . --check
+
+    - name: Lint with flake8
+      run: |
+        flake8 . --count --show-source --statistics
+
+    - name: Run tests with coverage
+      env:
+        DATABASE_NAME: tmsdb
+        DATABASE_USERNAME: dbuser
+        DATABASE_PASSWORD: dbpassword
+        DATABASE_HOST: localhost
+        DATABASE_PORT: 5432
+        DJANGO_SETTINGS_MODULE: TitansManager.settings
+        SECRET_KEY: testing_key
+      run: |
+        pytest --cov=. --cov-report=term-missing --cov-fail-under=80
+
+    - name: Generate coverage report artifact
+      if: success() || failure()
+      run: |
+        pytest --cov=. --cov-report=html
