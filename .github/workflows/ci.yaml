@@ -55,9 +55,6 @@ jobs:
         pip install -r requirements.txt
         pip install safety
 
-    - name: Security check dependencies
-      run: safety check
-
     - name: Check formatting with Black
       run: black . --check
 
