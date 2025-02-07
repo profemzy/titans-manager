@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 
-from core.models import User, Client, Project, Task, Income, Expense, Invoice
+from core.models import Client, Expense, Income, Invoice, Project, User
 
 
 class Command(BaseCommand):
@@ -16,7 +16,7 @@ class Command(BaseCommand):
             password="admin123",
             role="Admin",
         )
-        manager = User.objects.create_user(
+        User.objects.create_user(
             username="manager",
             email="manager@titansmanager.com",
             password="manager123",
@@ -40,16 +40,6 @@ class Command(BaseCommand):
             start_date="2023-10-01",
             end_date="2023-12-31",
             client=client_a,
-        )
-
-        # Create Tasks
-        task_1 = Task.objects.create(
-            name="Design Homepage",
-            description="Design the homepage layout",
-            project=project_x,
-            assigned_to=manager,
-            status="pending",  # Changed to match new status choices
-            due_date="2023-10-15",
         )
 
         # Create Invoices

@@ -3,17 +3,12 @@
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
+                                   SpectacularSwaggerView)
+from rest_framework_simplejwt.views import (TokenObtainPairView,
+                                            TokenRefreshView)
 
-from core.views import HealthCheckView
+from core.views.system.health_views import HealthCheckView
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="landing_page.html"), name="home"),

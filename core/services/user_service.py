@@ -1,9 +1,10 @@
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 
-from core.models import User, Task
-from .base import BaseService
+from core.models import Task, User
+
 from .. import models
+from .base import BaseService
 
 
 class UserService(BaseService[User]):

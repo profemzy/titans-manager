@@ -1,18 +1,14 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.utils import timezone
 from django.utils.html import format_html
 from rangefilter.filters import DateRangeFilter
 
+from core.admin.mixins import (MetricsMixin, ReportsToDisplayMixin,
+                               StatusDisplayMixin, TimestampDisplayMixin,
+                               WorkloadDisplayMixin)
 from core.models import User
-from core.admin.mixins import (
-    StatusDisplayMixin,
-    WorkloadDisplayMixin,
-    ReportsToDisplayMixin,
-    TimestampDisplayMixin,
-    MetricsMixin,
-)
 
 
 @admin.register(User)

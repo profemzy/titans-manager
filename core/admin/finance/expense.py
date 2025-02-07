@@ -1,10 +1,11 @@
 from decimal import Decimal
+
 from django.contrib import admin
-from django.db.models import Sum, DecimalField
+from django.db.models import DecimalField, Sum
 from rangefilter.filters import DateRangeFilter
 
-from core.models import Expense
 from core.admin.mixins import FinancialAdminMixin
+from core.models import Expense
 
 
 @admin.register(Expense)

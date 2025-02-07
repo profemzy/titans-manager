@@ -1,10 +1,11 @@
 from decimal import Decimal
+
 from django.contrib import admin
-from django.db.models import Sum, DecimalField
+from django.db.models import DecimalField, Sum
 from django.utils.html import format_html
 
-from core.models import Invoice
 from core.admin.mixins import FinancialAdminMixin
+from core.models import Invoice
 
 
 @admin.register(Invoice)

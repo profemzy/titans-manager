@@ -1,13 +1,15 @@
 import calendar
 from decimal import Decimal
 from io import BytesIO
-from django.db.models import Sum, DecimalField
+
+from django.db.models import DecimalField, Sum
 from django.db.models.functions import ExtractMonth, ExtractYear
-from reportlab.lib.colors import HexColor, black, white
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
+from reportlab.lib.colors import HexColor, black
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.platypus import (Paragraph, SimpleDocTemplate, Spacer, Table,
+                                TableStyle)
 
 
 class FinancialReportService:

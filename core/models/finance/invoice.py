@@ -1,7 +1,8 @@
 from decimal import Decimal
-from django.utils import timezone
+
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 from core.models.mixins.timestamp import TimestampMixin
 

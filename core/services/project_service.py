@@ -1,12 +1,14 @@
 from datetime import date
 from decimal import Decimal
-from typing import Dict, List, Any
-from django.utils import timezone
+from typing import Any, Dict, List
+
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
+from django.utils import timezone
 
 from core.models import Project, User
+
 from .base import BaseService
 
 

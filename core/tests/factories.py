@@ -1,9 +1,11 @@
 # core/tests/factories.py
-import factory
-from django.contrib.auth import get_user_model
 from datetime import date, timedelta
 from decimal import Decimal
-from core.models import Project, Task, Client
+
+import factory
+from django.contrib.auth import get_user_model
+
+from core.models import Client, Project, Task
 
 
 class UserFactory(factory.django.DjangoModelFactory):

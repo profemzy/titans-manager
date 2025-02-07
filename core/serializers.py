@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, Client, Project, Task, Income, Expense, Invoice
+from .models import Client, Expense, Income, Invoice, Project, Task, User
 
 
 class HealthCheckSerializer(serializers.Serializer):

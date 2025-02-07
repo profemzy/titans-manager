@@ -1,9 +1,10 @@
+from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
-from . import Project, User
-from django.core.validators import MinValueValidator
 
-from .mixins.timestamp import TimestampMixin
+from core.models import Project
+from core.models.mixins.timestamp import TimestampMixin
 
 
 class Task(TimestampMixin):
@@ -44,10 +45,10 @@ class Task(TimestampMixin):
     # Relations
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
     assigned_to = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="tasks"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tasks"
     )
     reviewer = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

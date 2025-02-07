@@ -1,7 +1,10 @@
 import datetime
+
 from django.db import models
-from core.models import Client, Project
-from core.models.mixins.timestamp import TimestampMixin
+
+from .. import Project
+from ..mixins.timestamp import TimestampMixin
+from ..client import Client
 
 
 class Income(TimestampMixin):

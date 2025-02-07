@@ -1,11 +1,13 @@
-from django.test import TestCase
-from django.core.exceptions import ValidationError
 from datetime import date, timedelta
 from decimal import Decimal
 
-from core.services.project_service import ProjectService
+from django.core.exceptions import ValidationError
+from django.test import TestCase
+
 from core.models import Project
-from .factories import UserFactory, ClientFactory, ProjectFactory
+from core.services.project_service import ProjectService
+
+from .factories import ClientFactory, ProjectFactory, UserFactory
 
 
 class ProjectServiceTest(TestCase):

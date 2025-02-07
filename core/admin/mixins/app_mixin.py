@@ -1,6 +1,6 @@
-from django.utils.html import format_html
+from django.db.models import Q, Sum
 from django.template.response import TemplateResponse
-from django.db.models import Sum, Q, Count
+from django.utils.html import format_html
 
 
 class DisplayMixin:

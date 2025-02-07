@@ -1,6 +1,7 @@
+from datetime import UTC, datetime  # Add UTC import
+
 from django.conf import settings
 from storages.backends.azure_storage import AzureStorage
-from datetime import datetime, UTC  # Add UTC import
 
 
 class AzureReceiptStorage(AzureStorage):

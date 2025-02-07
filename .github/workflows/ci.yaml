@@ -34,7 +34,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.13'  # Specify the Python version you need
+        python-version: '3.13'
 
     - name: Install dependencies
       run: |
@@ -50,4 +50,5 @@ jobs:
         DATABASE_HOST: localhost
         DATABASE_PORT: 5432
       run: |
+        flake8 
         pytest

@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Type, Optional, List
+from typing import Generic, List, Optional, Type, TypeVar
 
 from django.db import transaction
 

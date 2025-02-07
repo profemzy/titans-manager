@@ -1,7 +1,10 @@
 from decimal import Decimal
-from typing import Dict, Any
+from typing import Any, Dict
+
 from django.db.models import Sum
+
 from core.models import Client
+
 from .base import BaseService
 
 

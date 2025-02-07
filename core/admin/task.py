@@ -1,16 +1,12 @@
 from django.contrib import admin
-from django.utils.html import format_html
 from django.db.models import Count, Q
 from django.utils import timezone
+from django.utils.html import format_html
 from rangefilter.filters import DateRangeFilter
 
+from core.admin.mixins import (MetricsMixin, StatusDisplayMixin,
+                               TimestampDisplayMixin)
 from core.models import Task
-from core.admin.mixins import (
-    StatusDisplayMixin,
-    TimestampDisplayMixin,
-    MetricsMixin,
-    DisplayMixin,
-)
 
 
 @admin.register(Task)

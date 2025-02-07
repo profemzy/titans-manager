@@ -3,11 +3,8 @@ from django.db.models import Count
 from django.utils.html import format_html
 from rangefilter.filters import DateRangeFilter
 
-from core.admin.mixins import (
-    StatusDisplayMixin,
-    FinancialMetricsMixin,
-    TimestampDisplayMixin,
-)
+from core.admin.mixins import (FinancialMetricsMixin, StatusDisplayMixin,
+                               TimestampDisplayMixin)
 from core.models import Client
 
 

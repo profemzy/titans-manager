@@ -1,8 +1,10 @@
-from django.db import models
 import datetime
-from . import CATEGORY_CHOICES
-from ..mixins.timestamp import TimestampMixin
+
+from django.db import models
+
 from ...custom_storage import AzureReceiptStorage
+from ..mixins.timestamp import TimestampMixin
+from . import CATEGORY_CHOICES
 
 
 class Expense(TimestampMixin):
