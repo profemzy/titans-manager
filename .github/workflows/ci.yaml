@@ -99,5 +99,5 @@ jobs:
 
     - name: Build and push image to ACR
       run: |
-        docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:develop-${{ github.sha }} .
-        docker push ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:develop-${{ github.sha }}
+        docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:${{ github.sha }} .
+        docker push ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:${{ github.sha }}
