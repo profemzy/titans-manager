@@ -77,7 +77,7 @@ jobs:
       run: |
         pytest --cov=. --cov-report=html
 
-  build-develop:
+  build:
     needs: test
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
