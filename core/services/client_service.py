@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import Any, Dict
 
 from django.db.models import Sum
+from django.core.exceptions import ValidationError
 
 from core.models import Client
 
@@ -31,7 +32,22 @@ class ClientService(BaseService[Client]):
         }
 
     def update_status(self, client: Client, new_status: str) -> Client:
-        """Update client's status"""
+        """
+        Update client's status
+
+        Args:
+            client: Client instance to update
+            new_status: New status value
+
+        Raises:
+            ValidationError: If status is not one of the valid choices
+        """
+        valid_statuses = dict(Client.STATUS_CHOICES).keys()
+        if new_status not in valid_statuses:
+            raise ValidationError(
+                f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
+            )
+
         client.status = new_status
         client.save()
         return client
