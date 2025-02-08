@@ -59,13 +59,13 @@ jobs:
     - name: Verify Deployment
       run: |
         echo "Checking deployment status..."
-        kubectl get deployment titans-manager -n wackops
+        kubectl rollout status deployment/tms-app -n wackops
         
         echo "Checking pod status..."
-        kubectl get pods -l app=titans-manager -n wackops
+        kubectl get pods -l app=tms-app -n wackops
         
         echo "Checking service status..."
-        kubectl get svc titans-manager -n wackops
+        kubectl get svc tms-app -n wackops
         
         echo "Checking HPA status..."
-        kubectl get hpa -n wackops
+        kubectl get tms-app-hpa -n wackops
