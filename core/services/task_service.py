@@ -1,8 +1,9 @@
-from datetime import date, datetime
+from datetime import date
 from typing import Dict, List
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 
 from core.models import Task, User
 
@@ -18,10 +19,10 @@ class TaskService(BaseService[Task]):
         self, name: str, project_id: int, assigned_to_id: int, due_date: date, **kwargs
     ) -> Task:
         """Create a new task with validation."""
-        if due_date < date.today():
+        if due_date < timezone.now().date():
             raise ValidationError("Due date cannot be in the past")
 
-        task = self.create(
+        task = super().create(
             name=name,
             project_id=project_id,
             assigned_to_id=assigned_to_id,
@@ -40,13 +41,12 @@ class TaskService(BaseService[Task]):
             return task
 
         if new_status == "in_progress" and not task.started_at:
-            task.started_at = datetime.now()
+            task.started_at = timezone.now()
         elif new_status == "completed" and not task.completed_at:
-            task.completed_at = datetime.now()
+            task.completed_at = timezone.now()
 
         task = self.update(task, status=new_status)
 
-        # Could add status change logging here
         return task
 
     def get_task_dependencies(self, task: Task) -> Dict[str, List[Task]]:
