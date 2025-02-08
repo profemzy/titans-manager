@@ -2,65 +2,119 @@
 {% load humanize %}
 
 {% block content_title %}
-    <h1>Expense Management</h1>
-    <style>
-        @media (min-width: 768px) {
-            .summary-container {
-                flex-direction: row !important;
-            }
-        }
-    </style>
-    <div style="margin: 20px auto; max-width: 800px; padding: 15px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 25px;">
-            <h2 style="color: #333; margin-bottom: 20px; font-size: clamp(1.5rem, 4vw, 2rem);">Expense Summary</h2>
-            <div style="font-size: clamp(1.2rem, 3vw, 1.5rem); color: #e74c3c; font-weight: bold;">
-                Total Expenses: ${{ summary_metrics.total_expenses|floatformat:2|intcomma }}
+    <div class="max-w-7xl mx-auto">
+        <!-- Main Header -->
+        <div class="bg-white shadow-sm rounded-lg mb-6">
+            <div class="px-4 py-5 sm:p-6">
+                <h1 class="text-2xl font-bold text-gray-900">Expense Management</h1>
+                <p class="mt-1 text-sm text-gray-500">Track and manage your business expenses</p>
             </div>
         </div>
 
-        <div class="summary-container" style="display: flex; flex-direction: column; gap: 20px;">
-            <!-- Category Summary -->
-            <div style="flex: 1; background-color: #f8f9fa; padding: 15px; border-radius: 6px;">
-                <h3 style="color: #444; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; font-size: clamp(1.1rem, 3vw, 1.3rem);">
-                    Expenses by Category
-                </h3>
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                    {% for item in summary_metrics.category_totals %}
-                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: clamp(0.9rem, 2.5vw, 1rem);">
-                            <span style="color: #666;">{{ item.category|title }}</span>
-                            <span style="color: #e74c3c; font-weight: bold;">${{ item.total|floatformat:2|intcomma }}</span>
-                        </li>
-                    {% endfor %}
-                </ul>
+        <!-- Quick Actions -->
+        <div class="flex flex-wrap gap-4 mb-6 px-4 sm:px-0">
+            <a href="{% url 'admin:expense-report' %}" 
+               class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Generate Report
+            </a>
+            <a href="{% url 'admin:core_expense_add' %}" 
+               class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add Expense
+            </a>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 gap-6 mb-6 px-4 sm:px-0 sm:grid-cols-2 lg:grid-cols-3">
+            <!-- Total Card -->
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <dt class="text-sm font-medium text-gray-500 truncate">Total Expenses</dt>
+                    <dd class="mt-1 text-3xl font-semibold text-gray-900">${{ summary_metrics.total_expenses|floatformat:2|intcomma }}</dd>
+                </div>
             </div>
 
-            <!-- Monthly Summary -->
-            <div style="flex: 1; background-color: #f8f9fa; padding: 15px; border-radius: 6px;">
-                <h3 style="color: #444; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; font-size: clamp(1.1rem, 3vw, 1.3rem);">
-                    Monthly Expenses
-                </h3>
-                <ul style="list-style: none; padding: 0; margin: 0;">
+            <!-- Category Summary -->
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg sm:col-span-2 lg:col-span-2">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Expenses by Category</h3>
+                    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                        {% for item in summary_metrics.category_totals %}
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                            <span class="text-sm font-medium text-gray-500">{{ item.category|title }}</span>
+                            <span class="text-sm font-semibold text-gray-900">${{ item.total|floatformat:2|intcomma }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Panel -->
+        <div class="bg-white shadow-sm rounded-lg mb-6">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Filters</h3>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="space-y-1">
+                        <label for="status" class="text-sm font-medium text-gray-700">Status</label>
+                        <select id="status" name="status" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <option value="">All Statuses</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label for="category" class="text-sm font-medium text-gray-700">Category</label>
+                        <select id="category" name="category" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label for="from_date" class="text-sm font-medium text-gray-700">From Date</label>
+                        <input type="date" id="from_date" name="from_date" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label for="to_date" class="text-sm font-medium text-gray-700">To Date</label>
+                        <input type="date" id="to_date" name="to_date" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-end space-x-3">
+                    <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Reset
+                    </button>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Summary -->
+        <div class="bg-white shadow-sm rounded-lg mb-6">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Monthly Summary</h3>
+                <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                     {% for item in summary_metrics.monthly_totals %}
-                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: clamp(0.9rem, 2.5vw, 1rem);">
-                            <span style="color: #666;">
-                                {% with month=item.date__month|stringformat:"02d" %}
-                                    {{ item.date__year }}-{{ month }}
-                                {% endwith %}
-                            </span>
-                            <span style="color: #e74c3c; font-weight: bold;">${{ item.total|floatformat:2|intcomma }}</span>
-                        </li>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                        <span class="text-sm font-medium text-gray-500">
+                            {% with month=item.date__month|stringformat:"02d" %}
+                                {{ item.date__year }}-{{ month }}
+                            {% endwith %}
+                        </span>
+                        <span class="text-sm font-semibold text-gray-900">${{ item.total|floatformat:2|intcomma }}</span>
+                    </div>
                     {% endfor %}
-                </ul>
+                </div>
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block object-tools-items %}
-    <a href="{% url 'admin:expense-report' %}" class="btn btn-primary">
-        Generate Report
-    </a>
-    {{ block.super }}
 {% endblock %}
 
 {% block content %}{{ block.super }}{% endblock %}
