@@ -6,13 +6,13 @@ from django.test import TestCase
 from freezegun import freeze_time
 
 from core.models import Income
-from core.services.finance.income_service import IncomeService
+from core.services.finance import income_service
 from core.tests.factories import ClientFactory, ProjectFactory, IncomeFactory
 
 
 class IncomeServiceTest(TestCase):
     def setUp(self):
-        self.service = IncomeService()
+        self.service = income_service.IncomeService()
         self.client = ClientFactory()
         self.project = ProjectFactory(client=self.client)
 

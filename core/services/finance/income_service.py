@@ -7,11 +7,14 @@ from django.db import transaction
 from django.db.models import Sum
 
 from core.models import Income
-
 from ..base import BaseService
+
+__all__ = ["IncomeService"]
 
 
 class IncomeService(BaseService[Income]):
+    """Service class for managing Income records"""
+
     def __init__(self):
         super().__init__(Income)
 
@@ -29,16 +32,30 @@ class IncomeService(BaseService[Income]):
         if amount <= 0:
             raise ValidationError("Amount must be positive")
 
-        income = self.create(
-            client_id=client_id,
-            project_id=project_id,
-            amount=amount,
-            income_type=income_type,
-            payment_method=payment_method,
-            date=date.today(),
-            **kwargs
-        )
+        # Create income record without date if it's in kwargs
+        income_data = {
+            "client_id": client_id,
+            "project_id": project_id,
+            "amount": amount,
+            "income_type": income_type,
+            "payment_method": payment_method,
+            "status": kwargs.get("status", "pending"),
+            "received_date": kwargs.get("received_date"),
+            "description": kwargs.get("description"),
+            "notes": kwargs.get("notes"),
+            "invoice": kwargs.get("invoice"),
+        }
 
+        # Only add date if not provided in kwargs
+        if "date" not in kwargs:
+            income_data["date"] = date.today()
+        else:
+            income_data["date"] = kwargs["date"]
+
+        # Filter out None values to allow model defaults to apply
+        income_data = {k: v for k, v in income_data.items() if v is not None}
+
+        income = self.create(**income_data)
         return income
 
     def get_income_summary(

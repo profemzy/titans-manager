@@ -1,11 +1,12 @@
 from decimal import Decimal
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import DecimalField, Sum
 from django.utils.html import format_html
 
 from core.admin.mixins import FinancialAdminMixin
 from core.models import Invoice
+from core.services.finance import InvoiceService
 
 
 @admin.register(Invoice)
@@ -52,6 +53,10 @@ class InvoiceAdmin(FinancialAdminMixin, admin.ModelAdmin):
         ),
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.invoice_service = InvoiceService()
+
     def display_status(self, obj):
         colors = {"draft": "grey", "sent": "blue", "paid": "green", "cancelled": "red"}
         return format_html(
@@ -81,11 +86,44 @@ class InvoiceAdmin(FinancialAdminMixin, admin.ModelAdmin):
     actions = ["mark_as_paid", "mark_as_sent"]
 
     def mark_as_paid(self, request, queryset):
-        queryset.update(status="paid")
+        success_count = 0
+        error_count = 0
+
+        for invoice in queryset:
+            try:
+                # Use the service to mark as paid, which will create income record
+                self.invoice_service.mark_as_paid(invoice, request.user)
+                success_count += 1
+            except Exception as e:
+                error_count += 1
+                self.message_user(
+                    request,
+                    f"Failed to mark invoice {invoice.invoice_number} as paid: {str(e)}",
+                    messages.ERROR,
+                )
+
+        if success_count:
+            self.message_user(
+                request,
+                f"Successfully marked {success_count} invoice(s) as paid.",
+                messages.SUCCESS,
+            )
+
+        if error_count:
+            self.message_user(
+                request,
+                f"Failed to mark {error_count} invoice(s) as paid. Check the error messages above.",
+                messages.WARNING,
+            )
 
     mark_as_paid.short_description = "Mark selected invoices as paid"
 
     def mark_as_sent(self, request, queryset):
-        queryset.update(status="sent")
+        updated = queryset.update(status="sent")
+        self.message_user(
+            request,
+            f"Successfully marked {updated} invoice(s) as sent.",
+            messages.SUCCESS,
+        )
 
     mark_as_sent.short_description = "Mark selected invoices as sent"

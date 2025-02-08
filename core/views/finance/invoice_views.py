@@ -6,7 +6,7 @@ from rest_framework.viewsets import ViewSet as BaseViewSet
 
 from core.models import Invoice
 from core.serializers import InvoiceSerializer
-from core.services.finance.invoice_service import InvoiceService
+from core.services.finance import InvoiceService
 
 
 class InvoiceViewSet(BaseViewSet):
