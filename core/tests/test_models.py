@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.test import TestCase
 from freezegun import freeze_time
 
-from core.models import Invoice, Project, Task, User
+from core.models import Invoice
 from .factories import (
     ClientFactory,
     ExpenseFactory,
