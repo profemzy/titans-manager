@@ -1,9 +1,10 @@
 from datetime import datetime
 from typing import Any, Dict
 
+from django.db.models import Sum
+
 from core.models import Task, User
 
-from .. import models
 from .base import BaseService
 
 
@@ -25,7 +26,7 @@ class UserService(BaseService[User]):
             ).count(),
             "projects_count": user.assigned_projects.count(),
             "total_estimated_hours": active_tasks.aggregate(
-                total=models.Sum("estimated_hours")
+                total=Sum("estimated_hours")
             )["total"]
             or 0,
         }
