@@ -105,8 +105,35 @@ jobs:
         docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:${{ github.sha }} .
         docker push ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:${{ github.sha }}
 
-  deploy-production:
+  build:
     needs: test
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Azure login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Login to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Build and push production image
+      run: |
+        docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:${{ github.sha }} .
+        docker tag ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:${{ github.sha }} ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:latest
+        docker push ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:${{ github.sha }}
+        docker push ${{ secrets.ACR_LOGIN_SERVER }}/titans-manager:latest
+
+  deploy:
+    needs: [test, build]
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
     runs-on: ubuntu-latest
     environment: wackops
