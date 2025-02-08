@@ -85,7 +85,7 @@ The project uses pytest for testing. Tests are organized by service:
 
 Run tests with coverage:
 ```bash
-pytest --cov=. --cov-report=term-missing --cov-fail-under=50
+pytest --cov=. --cov-report=term-missing --cov-fail-under=70
 ```
 
 ### Test Design Principles:
