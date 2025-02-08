@@ -61,6 +61,7 @@ pip install -r requirements.txt
 ```
 
 3. Configure environment variables:
+copy env.example .env
 ```env
 DATABASE_NAME=tmsdb
 DATABASE_USERNAME=dbuser
