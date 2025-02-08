@@ -1,5 +1,5 @@
 # Stage 1: Base build stage
-FROM python:3.13.0a4-slim-bookworm AS builder
+FROM 3.13.2-slim-bookworm AS builder
 
 # Add metadata
 LABEL maintainer="InfoTitans <dev@infotitans.ca>" \
@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && rm -rf /root/.cache/pip/*
 
 # Stage 2: Production stage
-FROM python:3.13.0a4-slim-bookworm
+FROM 3.13.2-slim-bookworm
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
