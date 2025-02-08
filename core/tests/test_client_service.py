@@ -2,11 +2,10 @@ from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from django.db.models import Sum
 
-from core.services.client_service import ClientService
 from core.models import Client
-from .factories import ClientFactory, ProjectFactory, UserFactory
+from core.services.client_service import ClientService
+from .factories import ClientFactory, ProjectFactory
 
 
 class ClientServiceTest(TestCase):
@@ -70,7 +69,7 @@ class ClientServiceTest(TestCase):
             city="Test City",
             state="Test State",
             postal_code="12345",
-            country="Test Country"
+            country="Test Country",
         )
 
         # Test full address
@@ -83,28 +82,20 @@ class ClientServiceTest(TestCase):
         self.assertEqual(client.total_projects, 2)
 
         # Test string representation
-        client_with_company = ClientFactory(
-            name="Test Client",
-            company="Test Company"
-        )
+        client_with_company = ClientFactory(name="Test Client", company="Test Company")
         self.assertEqual(str(client_with_company), "Test Client (Test Company)")
 
-        client_without_company = ClientFactory(
-            name="Test Client",
-            company=None
-        )
+        client_without_company = ClientFactory(name="Test Client", company=None)
         self.assertEqual(str(client_without_company), "Test Client")
 
     def test_client_projects_metrics(self):
         """Test getting client projects metrics"""
         # Create projects with different statuses
         active_projects = [
-            ProjectFactory(client=self.client, status="in_progress")
-            for _ in range(2)
+            ProjectFactory(client=self.client, status="in_progress") for _ in range(2)
         ]
         completed_projects = [
-            ProjectFactory(client=self.client, status="completed")
-            for _ in range(3)
+            ProjectFactory(client=self.client, status="completed") for _ in range(3)
         ]
 
         # Test project counts
@@ -114,11 +105,11 @@ class ClientServiceTest(TestCase):
         # Test project filtering
         self.assertEqual(
             self.client.projects.filter(status="in_progress").count(),
-            len(active_projects)
+            len(active_projects),
         )
         self.assertEqual(
             self.client.projects.filter(status="completed").count(),
-            len(completed_projects)
+            len(completed_projects),
         )
 
         # Test financial summary reflects projects
