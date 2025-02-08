@@ -24,7 +24,7 @@ class ProjectModelTest(TestCase):
             manager=self.manager,
             budget=Decimal("10000.00"),
             start_date=date.today(),
-            end_date=date.today() + timedelta(days=30)
+            end_date=date.today() + timedelta(days=30),
         )
 
     def test_completion_percentage(self):
@@ -32,12 +32,10 @@ class ProjectModelTest(TestCase):
         TaskFactory.create_batch(
             2,
             project=self.project,
-            status="Completed"  # Changed to match model's choice
+            status="Completed",  # Changed to match model's choice
         )
         TaskFactory.create_batch(
-            2,
-            project=self.project,
-            status="Pending"  # Changed to match model's choice
+            2, project=self.project, status="Pending"  # Changed to match model's choice
         )
 
         self.assertEqual(self.project.completion_percentage, 50)
@@ -47,14 +45,10 @@ class ProjectModelTest(TestCase):
 
     def test_budget_utilized(self):
         # Create expenses totaling 2500
-        expense1 = ExpenseFactory(
-            amount=Decimal("1500.00")
-        )
+        expense1 = ExpenseFactory(amount=Decimal("1500.00"))
         expense1.projects.set([self.project])
 
-        expense2 = ExpenseFactory(
-            amount=Decimal("1000.00")
-        )
+        expense2 = ExpenseFactory(amount=Decimal("1000.00"))
         expense2.projects.set([self.project])
 
         # Update project's actual cost
@@ -66,22 +60,15 @@ class ProjectModelTest(TestCase):
 
     def test_profit_margin(self):
         # Create income of 10000 and expenses of 6000
-        IncomeFactory(
-            project=self.project,
-            amount=Decimal("10000.00")
-        )
-        expense = ExpenseFactory(
-            amount=Decimal("6000.00")
-        )
+        IncomeFactory(project=self.project, amount=Decimal("10000.00"))
+        expense = ExpenseFactory(amount=Decimal("6000.00"))
         expense.projects.set([self.project])
 
         # Profit margin should be 40%
         self.assertEqual(self.project.profit_margin, 40)
 
     def test_profit_margin_no_income(self):
-        expense = ExpenseFactory(
-            amount=Decimal("1000.00")
-        )
+        expense = ExpenseFactory(amount=Decimal("1000.00"))
         expense.projects.set([self.project])
         self.assertEqual(self.project.profit_margin, 0)
 
@@ -89,22 +76,19 @@ class ProjectModelTest(TestCase):
     def test_is_overdue(self):
         # Create a project due yesterday
         overdue_project = ProjectFactory(
-            end_date=date.today() - timedelta(days=1),
-            status="in_progress"
+            end_date=date.today() - timedelta(days=1), status="in_progress"
         )
         self.assertTrue(overdue_project.is_overdue)
 
         # Create a project due tomorrow
         future_project = ProjectFactory(
-            end_date=date.today() + timedelta(days=1),
-            status="in_progress"
+            end_date=date.today() + timedelta(days=1), status="in_progress"
         )
         self.assertFalse(future_project.is_overdue)
 
         # Completed projects should not be overdue
         completed_project = ProjectFactory(
-            end_date=date.today() - timedelta(days=1),
-            status="completed"
+            end_date=date.today() - timedelta(days=1), status="completed"
         )
         self.assertFalse(completed_project.is_overdue)
 
@@ -121,7 +105,7 @@ class InvoiceModelTest(TestCase):
             project=self.project,
             amount=Decimal("1000.00"),
             date=date.today(),
-            due_date=date.today() + timedelta(days=30)
+            due_date=date.today() + timedelta(days=30),
         )
 
         # First invoice of the month should end with 0001
@@ -132,7 +116,7 @@ class InvoiceModelTest(TestCase):
             project=self.project,
             amount=Decimal("2000.00"),
             date=date.today(),
-            due_date=date.today() + timedelta(days=30)
+            due_date=date.today() + timedelta(days=30),
         )
 
         # Second invoice should end with 0002
@@ -148,9 +132,11 @@ class InvoiceModelTest(TestCase):
                 project=self.project,
                 amount=Decimal("1000.00"),
                 date=date.today(),
-                due_date=date.today() + timedelta(days=30)
+                due_date=date.today() + timedelta(days=30),
             )
-            self.assertNotIn(invoice.invoice_number, [i.invoice_number for i in invoices])
+            self.assertNotIn(
+                invoice.invoice_number, [i.invoice_number for i in invoices]
+            )
             invoices.append(invoice)
 
 
@@ -158,25 +144,16 @@ class UserModelTest(TestCase):
     @freeze_time("2025-02-07")
     def test_employee_id_generation(self):
         # Test employee ID for different departments
-        dev_user = UserFactory(
-            department="development",
-            role="Employee"
-        )
+        dev_user = UserFactory(department="development", role="Employee")
         self.assertTrue(dev_user.employee_id.startswith("25DE"))
 
-        sales_user = UserFactory(
-            department="sales",
-            role="Employee"
-        )
+        sales_user = UserFactory(department="sales", role="Employee")
         self.assertTrue(sales_user.employee_id.startswith("25SA"))
 
     def test_employee_id_sequence(self):
         # Test that sequential employees get sequential numbers
         department = "development"
-        users = [
-            UserFactory(department=department, role="Employee")
-            for _ in range(3)
-        ]
+        users = [UserFactory(department=department, role="Employee") for _ in range(3)]
 
         # Extract sequence numbers
         sequences = [int(user.employee_id[-3:]) for user in users]
@@ -205,23 +182,18 @@ class UserModelTest(TestCase):
             assigned_to=user,
             status="Completed",
             actual_hours=Decimal("4.5"),
-            completed_at=now
+            completed_at=now,
         )
         TaskFactory(
             assigned_to=user,
             status="Completed",
             actual_hours=Decimal("3.5"),
-            completed_at=now
+            completed_at=now,
         )
         # Create a pending task (shouldn't be counted)
-        TaskFactory(
-            assigned_to=user,
-            status="Pending",
-            actual_hours=Decimal("2.0")
-        )
+        TaskFactory(assigned_to=user, status="Pending", actual_hours=Decimal("2.0"))
 
         total_hours = user.get_total_hours_worked(
-            start_date=start_datetime,
-            end_date=end_datetime
+            start_date=start_datetime, end_date=end_datetime
         )
         self.assertEqual(total_hours, Decimal("8.0"))
