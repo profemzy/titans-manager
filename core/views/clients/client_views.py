@@ -1,6 +1,6 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet as BaseViewSet
+from rest_framework.viewsets import ViewSet as BaseViewSet  # Keeping your existing import
 
 from core.models import Client
 from core.serializers import ClientSerializer
@@ -14,6 +14,10 @@ class ClientViewSet(BaseViewSet):
     search_fields = ["name", "email", "company"]
     ordering_fields = ["name", "created_at"]
     filterset_fields = ["status", "country"]
+
+    def get_object(self):
+        """Add get_object method to work with the detail action"""
+        return Client.objects.get(pk=self.kwargs["pk"])
 
     @action(detail=True, methods=["get"])
     def financial_summary(self, request, pk=None):
