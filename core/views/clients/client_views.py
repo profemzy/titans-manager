@@ -1,6 +1,8 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet as BaseViewSet  # Keeping your existing import
+from rest_framework.viewsets import (
+    ViewSet as BaseViewSet,
+)  # Keeping your existing import
 
 from core.models import Client
 from core.serializers import ClientSerializer
