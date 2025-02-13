@@ -1,6 +1,7 @@
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.utils.decorators import method_decorator
 
 from core.models import User
 from core.serializers import UserSerializer
@@ -21,7 +22,7 @@ class UserViewSet(BaseViewSet):
         return self.queryset.select_related("reports_to")
 
     @action(detail=True, methods=["get"])
-    @cache_page(60 * 15)  # Cache for 15 minutes
+    @method_decorator(cache_page(60 * 15))
     def workload(self, request, pk=None):
         """Get user's current workload"""
         user = self.get_object()

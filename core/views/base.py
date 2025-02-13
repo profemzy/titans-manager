@@ -4,6 +4,7 @@ from rest_framework import status, viewsets
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
 
 class BaseViewSet(viewsets.ModelViewSet):
@@ -15,6 +16,10 @@ class BaseViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Override to implement proper select_related and prefetch_related"""
         return super().get_queryset()
+
+    def get_object(self):
+        """Get object for detail actions"""
+        return get_object_or_404(self.queryset, pk=self.kwargs["pk"])
 
     def handle_exception(self, exc):
         """Handle common exceptions"""

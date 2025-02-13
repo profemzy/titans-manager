@@ -3,7 +3,7 @@ from django.views.decorators.cache import cache_page
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
+from django.utils.decorators import method_decorator
 from core.filters import ProjectFilter
 from core.models import Project
 from core.serializers import ProjectSerializer
@@ -39,7 +39,7 @@ class ProjectViewSet(BaseViewSet):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["get"])
-    @cache_page(60 * 5)  # Cache for 5 minutes
+    @method_decorator(cache_page(60 * 5))  # Cache for 5 minutes
     def metrics(self, request, pk=None):
         """Get project metrics"""
         project = self.get_object()
