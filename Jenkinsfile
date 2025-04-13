@@ -3,7 +3,6 @@ pipeline {
 
     tools {
         git 'Git'
-        python 'Python3'
     }
 
     environment {
@@ -13,7 +12,7 @@ pipeline {
         IMAGE_NAME = "titans-manager"
         AKS_CLUSTER_NAME = "wackops-prod-cluster"
         AKS_RESOURCE_GROUP = "wackops-prod"
-        AKS_NAMESPACE = "wackops"
+        AKS_NAMESPACE = "titans-manager"
         K8S_MANIFEST_DIR = "kubernetes"
     }
 
@@ -39,27 +38,21 @@ pipeline {
             }
         }
 
-        stage('Setup Environment') {
+        stage('Setup Python Environment') {
             steps {
-                script {
-                    def pythonHome = tool name: 'Python3', type: 'python'
-                    env.PYTHON_HOME = pythonHome
-                    env.PATH = "${pythonHome}/bin:${env.PATH}"
-
-                    sh '''
-                        python --version
-                        pip --version
-                    '''
-                }
+                sh '''
+                    python3 --version
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                '''
             }
         }
 
         stage('Install Dependencies') {
             steps {
                 sh '''
-                    python -m venv venv
                     . venv/bin/activate
-                    pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
             }
@@ -130,9 +123,9 @@ pipeline {
 
                         kubectl get namespace ${AKS_NAMESPACE} || kubectl create namespace ${AKS_NAMESPACE}
 
-                        sed -i "s|image: .*|image: ${REGISTRY}/${IMAGE_NAME}:${env.BUILD_NUMBER}|g" ${K8S_MANIFEST_DIR}/deployment.yaml
+                        sed -i "s|image: .*|image: ${REGISTRY}/${IMAGE_NAME}:${env.BUILD_NUMBER}|g" kubernetes/deployment.yaml
 
-                        kubectl apply -f ${K8S_MANIFEST_DIR}/ -n ${AKS_NAMESPACE}
+                        kubectl apply -f kubernetes/ -n ${AKS_NAMESPACE}
 
                         kubectl rollout status deployment/${IMAGE_NAME} -n ${AKS_NAMESPACE}
                     """
@@ -143,7 +136,6 @@ pipeline {
 
     post {
         always {
-            sh 'docker logout ${REGISTRY}'
             cleanWs()
         }
         success {
