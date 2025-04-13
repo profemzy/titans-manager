@@ -6,6 +6,7 @@ from core.models import Client, Expense, Income, Invoice, Project, User
 from datetime import date, timedelta
 import random
 
+
 class Command(BaseCommand):
     help = "Seeds the database with realistic initial data"
 

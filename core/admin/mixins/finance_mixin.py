@@ -28,11 +28,12 @@ class FinancialAdminMixin:
 
         queryset = response.context_data["cl"].queryset
         response.context_data["summary_metrics"] = self.get_summary_metrics(queryset)
-        response.context_data["export_csv_url"] = f"{self.model._meta.app_label}:{self.model._meta.model_name}-export-csv"
+        response.context_data["export_csv_url"] = (
+            f"{self.model._meta.app_label}:{self.model._meta.model_name}-export-csv"
+        )
         return response
 
     def get_urls(self):
-        """Add report generation and CSV export URLs to all financial admin views"""
         urls = super().get_urls()
         custom_urls = [
             path(
@@ -43,15 +44,12 @@ class FinancialAdminMixin:
             path(
                 "export-csv/",
                 self.export_csv,
-                name=(
-    f"{self.model._meta.app_label}_{self.model._meta.model_name}-export-csv"
-),
+                name=f"{self.model._meta.app_label}_{self.model._meta.model_name}-export-csv",
             ),
         ]
         return custom_urls + urls
 
     def generate_report_view(self, request):
-        """Shared report generation view"""
         from datetime import datetime
 
         report_service = FinancialReportService()
@@ -91,33 +89,42 @@ class FinancialAdminMixin:
         return response
 
     def export_csv(self, request):
-        """Export queryset to CSV with required fields only"""
         queryset = self.get_queryset(request)
         model_name = self.model._meta.model_name
 
         if model_name == "income":
             fields = ["date", "amount", "client", "project", "invoice"]
         elif model_name == "expense":
-            fields = ["date", "title", "amount", "category", "payment_method", "status", "vendor"]
+            fields = [
+                "date",
+                "title",
+                "amount",
+                "category",
+                "payment_method",
+                "status",
+                "vendor",
+            ]
         else:
             fields = [field.name for field in self.model._meta.fields]
 
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f'attachment; filename="{model_name}_export.csv"'
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename="{model_name}_export.csv"'
 
         writer = csv.writer(response)
         writer.writerow(fields)
 
         for obj in queryset:
-            row = [getattr(obj, field) if not callable(getattr(obj, field)) else getattr(obj, field)() for field in fields]
+            row = [
+                getattr(obj, field) if not callable(getattr(obj, field)) else getattr(obj, field)()
+                for field in fields
+            ]
             writer.writerow(row)
 
         return response
 
     def get_report_context(self, queryset, start_date, end_date):
-        """
-        Override this method in child classes to provide report-specific context
-        """
         return {
             "queryset": queryset,
             "start_date": start_date,
