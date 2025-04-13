@@ -78,3 +78,18 @@ class ExpenseServiceTest(TestCase):
         self.assertEqual(categories["software"], Decimal("100.00"))
         self.assertEqual(categories["hardware"], Decimal("200.00"))
         self.assertEqual(categories["travel"], Decimal("300.00"))
+
+    def test_export_expense_csv(self):
+        ExpenseFactory(title="Expense 1", amount=Decimal("100.00"), category="software", payment_method="credit_card", status="approved", vendor="Vendor A", date=date.today())
+        ExpenseFactory(title="Expense 2", amount=Decimal("200.00"), category="hardware", payment_method="cash", status="pending", vendor="Vendor B", date=date.today())
+
+        response = self.client.get("/titans-admin/core/expense/export-csv/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/csv")
+        self.assertIn('attachment; filename="expense_export.csv"', response["Content-Disposition"])
+
+        content = response.content.decode("utf-8")
+        self.assertIn("Expense 1", content)
+        self.assertIn("Expense 2", content)
+        self.assertIn("Vendor A", content)
+        self.assertIn("Vendor B", content)

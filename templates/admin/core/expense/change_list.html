@@ -1,66 +1,17 @@
 {% extends "admin/change_list.html" %}
-{% load humanize %}
 
-{% block content_title %}
-    <h1>Expense Management</h1>
-    <style>
-        @media (min-width: 768px) {
-            .summary-container {
-                flex-direction: row !important;
-            }
-        }
-    </style>
-    <div style="margin: 20px auto; max-width: 800px; padding: 15px; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 25px;">
-            <h2 style="color: #333; margin-bottom: 20px; font-size: clamp(1.5rem, 4vw, 2rem);">Expense Summary</h2>
-            <div style="font-size: clamp(1.2rem, 3vw, 1.5rem); color: #e74c3c; font-weight: bold;">
-                Total Expenses: ${{ summary_metrics.total_expenses|floatformat:2|intcomma }}
-            </div>
-        </div>
-
-        <div class="summary-container" style="display: flex; flex-direction: column; gap: 20px;">
-            <!-- Category Summary -->
-            <div style="flex: 1; background-color: #f8f9fa; padding: 15px; border-radius: 6px;">
-                <h3 style="color: #444; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; font-size: clamp(1.1rem, 3vw, 1.3rem);">
-                    Expenses by Category
-                </h3>
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                    {% for item in summary_metrics.category_totals %}
-                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: clamp(0.9rem, 2.5vw, 1rem);">
-                            <span style="color: #666;">{{ item.category|title }}</span>
-                            <span style="color: #e74c3c; font-weight: bold;">${{ item.total|floatformat:2|intcomma }}</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <!-- Monthly Summary -->
-            <div style="flex: 1; background-color: #f8f9fa; padding: 15px; border-radius: 6px;">
-                <h3 style="color: #444; margin-bottom: 15px; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px; font-size: clamp(1.1rem, 3vw, 1.3rem);">
-                    Monthly Expenses
-                </h3>
-                <ul style="list-style: none; padding: 0; margin: 0;">
-                    {% for item in summary_metrics.monthly_totals %}
-                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: clamp(0.9rem, 2.5vw, 1rem);">
-                            <span style="color: #666;">
-                                {% with month=item.date__month|stringformat:"02d" %}
-                                    {{ item.date__year }}-{{ month }}
-                                {% endwith %}
-                            </span>
-                            <span style="color: #e74c3c; font-weight: bold;">${{ item.total|floatformat:2|intcomma }}</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
+{% block object-tools %}
+<div class="object-tools">
+    <ul class="object-tools">
+        <li>
+            <a href="{% url 'admin:core_expense-export-csv' %}" class="addlink">Export CSV</a>
+        </li>
+        <li>
+            <a href="{% url 'admin:expense-report' %}" class="addlink">Generate Report</a>
+        </li>
+        <li>
+            <a href="{% url 'admin:core_expense_add' %}" class="addlink">Add Expense</a>
+        </li>
+    </ul>
+</div>
 {% endblock %}
-
-{% block object-tools-items %}
-    <a href="{% url 'admin:expense-report' %}" class="btn btn-primary">
-        Generate Report
-    </a>
-    {{ block.super }}
-{% endblock %}
-
-{% block content %}{{ block.super }}{% endblock %}
