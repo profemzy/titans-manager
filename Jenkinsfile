@@ -123,11 +123,11 @@ pipeline {
 
                         kubectl get namespace ${AKS_NAMESPACE} || kubectl create namespace ${AKS_NAMESPACE}
 
-                        sed -i "s|image: .*|image: ${REGISTRY}/${IMAGE_NAME}:${env.BUILD_NUMBER}|g" ${K8S_MANIFEST_DIR}/deployment.yaml
+                        sed -i "s|\(image: \).*|\1${REGISTRY}/${IMAGE_NAME}:${env.BUILD_NUMBER}|g" ${K8S_MANIFEST_DIR}/deployment.yaml
 
                         kubectl apply -f ${K8S_MANIFEST_DIR}/ -n ${AKS_NAMESPACE}
 
-                        kubectl rollout status deployment/${IMAGE_NAME} -n ${AKS_NAMESPACE}
+                        kubectl rollout status deployment/tms-app -n ${AKS_NAMESPACE}
                     """
                 }
             }
