@@ -12,7 +12,7 @@ pipeline {
         IMAGE_NAME = "titans-manager"
         AKS_CLUSTER_NAME = "wackops-prod-cluster"
         AKS_RESOURCE_GROUP = "wackops-prod"
-        AKS_NAMESPACE = "titans-manager"
+        AKS_NAMESPACE = "wackops"
         K8S_MANIFEST_DIR = "kubernetes"
     }
 
