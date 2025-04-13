@@ -43,7 +43,9 @@ class FinancialAdminMixin:
             path(
                 "export-csv/",
                 self.export_csv,
-                name=f"{self.model._meta.app_label}_{self.model._meta.model_name}-export-csv",
+                name=(
+    f"{self.model._meta.app_label}_{self.model._meta.model_name}-export-csv"
+),
             ),
         ]
         return custom_urls + urls

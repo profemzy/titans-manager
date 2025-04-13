@@ -19,7 +19,7 @@ class ExpenseServiceTest(TestCase):
         expense = self.service.create_expense(
             title="Office Supplies",
             amount=Decimal("150.00"),
-            category="utilities",  # Using a standard category
+            category="utilities",
             submitted_by_id=self.user.id,
             payment_method="credit_card",
             date=date.today(),
@@ -45,7 +45,7 @@ class ExpenseServiceTest(TestCase):
             self.service.create_expense(
                 title="Test Expense",
                 amount=Decimal("100.00"),
-                category="invalid_category",  # Category not in CATEGORY_CHOICES
+                category="invalid_category",
                 submitted_by_id=self.user.id,
                 payment_method="credit_card",
                 date=date.today(),
@@ -53,25 +53,21 @@ class ExpenseServiceTest(TestCase):
 
     @freeze_time("2025-02-07")
     def test_get_expense_summary(self):
-        # Create test expenses across different categories
         ExpenseFactory(amount=Decimal("100.00"), category="software", date=date.today())
         ExpenseFactory(amount=Decimal("200.00"), category="hardware", date=date.today())
         ExpenseFactory(amount=Decimal("300.00"), category="travel", date=date.today())
-        # Create an expense for previous month (shouldn't be included in filtered results)
         ExpenseFactory(
             amount=Decimal("400.00"),
             category="utilities",
             date=date.today() - timedelta(days=40),
         )
 
-        # Test summary with date filter
         summary = self.service.get_expense_summary(
             start_date=date.today() - timedelta(days=30), end_date=date.today()
         )
 
         self.assertEqual(summary["total_amount"], Decimal("600.00"))
 
-        # Convert categories summary to dict for easier testing
         categories = {
             item["category"]: item["total"] for item in summary["by_category"]
         }
@@ -80,8 +76,24 @@ class ExpenseServiceTest(TestCase):
         self.assertEqual(categories["travel"], Decimal("300.00"))
 
     def test_export_expense_csv(self):
-        ExpenseFactory(title="Expense 1", amount=Decimal("100.00"), category="software", payment_method="credit_card", status="approved", vendor="Vendor A", date=date.today())
-        ExpenseFactory(title="Expense 2", amount=Decimal("200.00"), category="hardware", payment_method="cash", status="pending", vendor="Vendor B", date=date.today())
+        ExpenseFactory(
+            title="Expense 1",
+            amount=Decimal("100.00"),
+            category="software",
+            payment_method="credit_card",
+            status="approved",
+            vendor="Vendor A",
+            date=date.today()
+        )
+        ExpenseFactory(
+            title="Expense 2",
+            amount=Decimal("200.00"),
+            category="hardware",
+            payment_method="cash",
+            status="pending",
+            vendor="Vendor B",
+            date=date.today()
+        )
 
         response = self.client.get("/titans-admin/core/expense/export-csv/")
         self.assertEqual(response.status_code, 200)
