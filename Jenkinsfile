@@ -88,7 +88,7 @@ pipeline {
         stage('Build & Push Docker Image') {
             steps {
                 withCredentials([
-                    usernamePassword(credentialsId: env.AZURE_CREDENTIALS_ID,
+                    usernamePassword(credentialsId: 'acr-credentials',
                                      passwordVariable: 'ACR_PASSWORD',
                                      usernameVariable: 'ACR_USERNAME')
                 ]) {
@@ -108,7 +108,7 @@ pipeline {
             }
             steps {
                 withCredentials([
-                    usernamePassword(credentialsId: env.AZURE_CREDENTIALS_ID,
+                    usernamePassword(credentialsId: 'azure-credentials',
                                      passwordVariable: 'AZURE_SP_PASSWORD',
                                      usernameVariable: 'AZURE_SP_ID'),
                     string(credentialsId: 'azure-tenant-id', variable: 'AZURE_TENANT_ID')
@@ -123,9 +123,9 @@ pipeline {
 
                         kubectl get namespace ${AKS_NAMESPACE} || kubectl create namespace ${AKS_NAMESPACE}
 
-                        sed -i "s|image: .*|image: ${REGISTRY}/${IMAGE_NAME}:${env.BUILD_NUMBER}|g" kubernetes/deployment.yaml
+                        sed -i "s|image: .*|image: ${REGISTRY}/${IMAGE_NAME}:${env.BUILD_NUMBER}|g" ${K8S_MANIFEST_DIR}/deployment.yaml
 
-                        kubectl apply -f kubernetes/ -n ${AKS_NAMESPACE}
+                        kubectl apply -f ${K8S_MANIFEST_DIR}/ -n ${AKS_NAMESPACE}
 
                         kubectl rollout status deployment/${IMAGE_NAME} -n ${AKS_NAMESPACE}
                     """
